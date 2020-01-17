@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/containers/libpod/libpod"
-	"net/http"
 )
 
 func testApiPodman() {
@@ -31,16 +30,8 @@ func testApiPodman() {
 
 }
 
-func proxyHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("requested")
-	w.Write([]byte ("salut"))
-}
-
 func main() {
 	conf := retrieveEnv()
 	startProxy(conf)
-
-	http.HandleFunc("/", proxyHandler)
-	http.ListenAndServe(":8080", nil)
 }
 

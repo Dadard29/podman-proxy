@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -15,6 +16,10 @@ type config struct {
 	// the api will be available through this host
 	ProxyHost string `json:"proxy_host"`
 	ProxyPort int `json:"proxy_port"`
+}
+
+func (c config) getAddr() string {
+	return fmt.Sprintf("%s:%d", c.ProxyHost, c.ProxyPort)
 }
 
 func getDefaultConfig() config {
