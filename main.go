@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/containers/libpod/cmd/podman/shared"
 	"github.com/containers/libpod/libpod"
-	createconfig "github.com/containers/libpod/pkg/spec"
+	"net/http"
 )
 
-func main() {
+func testApiPodman() {
 	c := context.Background()
 	runtime, err := libpod.NewRuntime(c)
 	if err != nil {
@@ -19,7 +18,7 @@ func main() {
 
 	containers, err := runtime.GetAllContainers()
 	if err != nil {
-		fmt.Println("error get all containers")
+		fmt.Println("error getting all containers")
 		fmt.Println(err)
 		return
 	}
@@ -30,20 +29,18 @@ func main() {
 		}
 	}
 
+}
 
-	cc := createconfig.CreateConfig{}
-	cc.Image = "nginx"
-	cc.Name = "new_server"
+func proxyHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("requested")
+	w.Write([]byte ("salut"))
+}
 
-	var pod *libpod.Pod
-	container, err := shared.CreateContainerFromCreateConfig(runtime, &cc, context.Background(), pod)
-	if err != nil {
-		fmt.Println("error creating container")
-		fmt.Println(err)
-		return
-	}
+func main() {
+	conf := retrieveEnv()
+	startProxy(conf)
 
-	fmt.Println(container.Name(), container.ID())
-
+	http.HandleFunc("/", proxyHandler)
+	http.ListenAndServe(":8080", nil)
 }
 
