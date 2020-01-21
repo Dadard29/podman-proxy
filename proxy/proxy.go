@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"fmt"
@@ -8,24 +8,21 @@ import (
 	"os"
 )
 
-var globalConf config
+var globalProxy *Proxy
 
-func checkMethod(methods []string, requestMethod string) bool {
-	for _, v := range methods {
-		if v == requestMethod {
-			return true
-		}
-	}
-	return false
+type Proxy struct {
+	exposedApi *api.Api
+	httpServer *http.Server
+	config     Config
 }
 
 // this handler will redirect the requests to the container
 // this is the proxy
 func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Host == globalConf.getAddr() {
+	if r.Host == globalProxy.config.getAddr() {
 
 		// redirect the request to the correct handler
-		for u, h := range api.GetRoutes() {
+		for u, h := range globalProxy.exposedApi.GetRoutes() {
 			if u == r.URL.String() && checkMethod(h.HttpMethods, r.Method) {
 				h.Handler(w, r)
 				return
@@ -47,14 +44,12 @@ func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func startProxy(conf config) {
-	globalConf = conf
-	proxyUrl := fmt.Sprintf(":%d", globalConf.ProxyPort)
+func NewProxy(conf Config) *Proxy {
+	proxyUrl := fmt.Sprintf("%s:%d", conf.ProxyHost, conf.ProxyPort)
 
 	// setup the main proxy route
 	http.HandleFunc("/", mainProxyHandler)
 
-	log.Printf("listening on %s...\n", proxyUrl)
 	server := &http.Server{
 		Addr:              proxyUrl,
 		Handler:           nil,
@@ -66,14 +61,30 @@ func startProxy(conf config) {
 		MaxHeaderBytes:    0,
 		TLSNextProto:      nil,
 		ConnState:         nil,
-		ErrorLog:          log.New(os.Stdout, "podman-proxy ", log.Ldate | log.Ltime),
+		ErrorLog:          log.New(os.Stdout, "podman-proxy ", log.Ldate|log.Ltime),
 		BaseContext:       nil,
 		ConnContext:       nil,
 	}
 
-	err := server.ListenAndServe()
+	exposeApi := api.NewApi()
+
+	p := &Proxy{
+		exposedApi: exposeApi,
+		httpServer: server,
+		config: conf,
+	}
+
+	globalProxy = p
+	return p
+}
+
+func (p *Proxy) Start() {
+	log.Printf("listening on %s...\n", p.httpServer.Addr)
+	err := p.httpServer.ListenAndServe()
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
+
+
