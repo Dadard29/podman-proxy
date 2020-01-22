@@ -9,11 +9,10 @@ import (
 )
 
 type RuleModel struct {
-	ContainerName string `gorm:"index:container_name;primary_key"`
-	Host string `gorm:"index:host"`
-	Port int `gorm:"index:port"`
-	ContainerIp string `gorm:"index:container_ip"`
-	ContainerPort int `gorm:"index:container_port"`
+	ContainerHost string `gorm:"index:container_host;primary_key"`
+	ContainerName string `gorm:"index:container_name"`
+	ContainerIp   string `gorm:"index:container_ip"`
+	ContainerPort int    `gorm:"index:container_port"`
 }
 
 func (RuleModel) TableName() string {
@@ -21,6 +20,7 @@ func (RuleModel) TableName() string {
 }
 
 func newConnector() *gorm.DB {
+	// FIXME
 	db, err := gorm.Open("sqlite3", "/home/dadard/go/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db")
 	if err != nil {
 		log.Fatalln(err)
@@ -43,20 +43,20 @@ func (a *Api) checkRuleExistsFromName(containerName string) (RuleModel, bool) {
 
 func (a *Api) checkRuleExistsFromHostname(host string) (RuleModel, bool) {
 	rule := RuleModel{
-		Host: host,
+		ContainerHost: host,
 	}
 	a.connector.First(&rule)
-	if rule.ContainerIp == "" || rule.Host != host {
+	if rule.ContainerIp == "" || rule.ContainerHost != host {
 		return RuleModel{}, false
 	}
 
 	return rule, true
 }
 
-func (a *Api) CreateRule(containerName string, containerPort int, host string) (RuleModel, error) {
+func (a *Api) CreateRule(containerName string, containerPort int, containerHost string) (RuleModel, error) {
 	defaultRule := RuleModel{}
 
-	if _, check := a.checkRuleExistsFromName(containerName); check {
+	if _, check := a.checkRuleExistsFromHostname(containerHost); check {
 		return defaultRule, errors.New(fmt.Sprintf("a rule for the container with name %s already exists", containerName))
 	}
 
@@ -70,27 +70,25 @@ func (a *Api) CreateRule(containerName string, containerPort int, host string) (
 		return defaultRule, err
 	}
 
-	portsExposed, err := con.PortMappings()
-	if err != nil {
-		return defaultRule, err
-	}
+	//portsExposed, err := con.PortMappings()
+	//if err != nil {
+	//	return defaultRule, err
+	//}
 
-	found := false
-	for _, p := range portsExposed {
-		if int (p.ContainerPort) == containerPort {
-			found = true
-		}
-	}
+	//found := false
+	//for _, p := range portsExposed {
+	//	if int (p.ContainerPort) == containerPort {
+	//		found = true
+	//	}
+	//}
+	//
+	//if ! found {
+	//	return defaultRule, errors.New(fmt.Sprintf("this port (%d) is not exposed by the container", containerPort))
+	//}
 
-	if ! found {
-		return defaultRule, errors.New(fmt.Sprintf("this port (%d) is not exposed by the container", containerPort))
-	}
-
-	port := 80
 	newRule := RuleModel{
 		ContainerName: containerName,
-		Host:          host,
-		Port:          port,
+		ContainerHost: containerHost,
 		ContainerIp:   containerIp,
 		ContainerPort: containerPort,
 	}

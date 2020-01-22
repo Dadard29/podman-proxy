@@ -5,7 +5,10 @@ import (
 	"github.com/Dadard29/podman-proxy/api"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
+	"strings"
 )
 
 var globalProxy *Proxy
@@ -16,31 +19,60 @@ type Proxy struct {
 	config     Config
 }
 
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+	// redirect the request to the correct handler
+	for u, h := range globalProxy.exposedApi.GetRoutes() {
+		if u == r.URL.String() && checkMethod(h.HttpMethods, r.Method) {
+			h.Handler(w, r)
+			return
+		}
+	}
+
+	// no valid handler found for this route and this http method
+	w.WriteHeader(http.StatusNotFound)
+	_, err := w.Write([]byte (fmt.Sprintf("%d %s\n", http.StatusNotFound, "custom page not found")))
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func redirectionHandler(w http.ResponseWriter, r *http.Request) {
+	splitted := strings.Split(r.Host, ":")
+	var requestedHost = splitted[0]
+
+	// retrieve the container ip and port from the request ContainerHost
+	rule, err := globalProxy.exposedApi.GetRule(requestedHost)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	containerUrlStr := fmt.Sprintf("http://%s:%d", rule.ContainerIp, rule.ContainerPort)
+	containerUrl, err := url.Parse(containerUrlStr)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	proxyService := httputil.NewSingleHostReverseProxy(containerUrl)
+
+	r.URL.Host = containerUrl.Host
+	r.Host = containerUrl.Host
+	r.URL.Scheme = containerUrl.Host
+	r.Header.Set("X-Forwarded-Host", r.Header.Get("ContainerHost"))
+
+	proxyService.ServeHTTP(w, r)
+}
+
 // this handler will redirect the requests to the container
 // this is the proxy
 func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Host == globalProxy.config.getAddr() {
+		apiHandler(w, r)
 
-		// redirect the request to the correct handler
-		for u, h := range globalProxy.exposedApi.GetRoutes() {
-			if u == r.URL.String() && checkMethod(h.HttpMethods, r.Method) {
-				h.Handler(w, r)
-				return
-			}
-		}
-
-		// no valid handler found for this route and this http method
-		w.WriteHeader(http.StatusNotFound)
-		_, err := w.Write([]byte (fmt.Sprintf("%d %s\n", http.StatusNotFound, "custom page not found")))
-		if err != nil {
-			log.Fatalln(err)
-		}
 	} else {
-		// retrieve the container ip and port from the request Host
-		_, err := w.Write([]byte ("redirected to some container\n"))
-		if err != nil {
-			log.Fatalln(err)
-		}
+		redirectionHandler(w, r)
 	}
 }
 

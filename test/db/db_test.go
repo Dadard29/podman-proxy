@@ -14,7 +14,7 @@ func TestDbConnector(t *testing.T) {
 
 func TestDbGet(t *testing.T) {
 	a := api.NewApi()
-	_, err := a.GetRule("nginx")
+	_, err := a.GetRule("server-host")
 	if err != nil {
 		t.Error(err)
 	}

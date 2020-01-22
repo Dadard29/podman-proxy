@@ -19,6 +19,9 @@ type Config struct {
 }
 
 func (c Config) getAddr() string {
+	if c.ProxyPort == 80 {
+		return c.ProxyHost
+	}
 	return fmt.Sprintf("%s:%d", c.ProxyHost, c.ProxyPort)
 }
 
@@ -49,6 +52,6 @@ func RetrieveConfig() Config {
 
 	return Config{
 		ProxyHost: "podman-proxy-host",
-		ProxyPort: 8080,
+		ProxyPort: 80,
 	}
 }

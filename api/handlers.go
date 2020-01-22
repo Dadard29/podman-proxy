@@ -88,7 +88,7 @@ func rulesHandlerPost(r request) (response, int) {
 		Message: "",
 		Rule: RuleModel{
 			ContainerName: r.ContainerName,
-			Host:          r.ContainerHost,
+			ContainerHost: r.ContainerHost,
 			ContainerPort: r.ContainerPort,
 		},
 	}
@@ -114,7 +114,7 @@ func rulesHandlerGet(r request) (response, int) {
 		Status:  false,
 		Message: "",
 		Rule: RuleModel{
-			Host:          r.ContainerHost,
+			ContainerHost: r.ContainerHost,
 		},
 	}
 
@@ -139,7 +139,7 @@ func rulesHandlerDelete(r request) (response, int) {
 		Status:  false,
 		Message: "",
 		Rule: RuleModel{
-			Host:          r.ContainerHost,
+			ContainerHost: r.ContainerHost,
 		},
 	}
 

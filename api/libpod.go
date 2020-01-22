@@ -41,6 +41,6 @@ func (a *Api) GetContainerIp(con *libpod.Container) (string, error) {
 		return "", err
 	}
 
-	return ips[0].String(), nil
+	return ips[0].IP.String(), nil
 }
 
