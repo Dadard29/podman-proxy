@@ -29,6 +29,10 @@ func NewApi() *Api {
 			HttpMethods: []string{http.MethodGet, http.MethodDelete, http.MethodPost, http.MethodPut},
 			Handler:     rulesHandler,
 		},
+		"/rules/list": {
+			HttpMethods: []string{http.MethodGet},
+			Handler:     rulesListHandler,
+		},
 	}
 
 	a :=&Api{

@@ -59,18 +59,12 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodPut {
 		res, httpStatusCode = rulesHandlerPut(req)
 	} else {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		httpStatusCode = http.StatusMethodNotAllowed
 		res = response{
 			Status:  false,
 			Message: "method not allowed",
 			Rule:    RuleModel{},
 		}
-		err = json.NewEncoder(w).Encode(res)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return
-
 	}
 
 	w.WriteHeader(httpStatusCode)

@@ -137,3 +137,14 @@ func (a *Api) UpdateRule(containerHost string, containerName string, containerPo
 	a.connector.Save(&rule)
 	return rule, nil
 }
+
+func (a *Api) ListRules() ([]RuleModel, error) {
+	var rulesList []RuleModel
+
+	a.connector.Find(&rulesList)
+	if rulesList == nil {
+		return rulesList, errors.New("error while querying the rules list")
+	}
+
+	return rulesList, nil
+}
