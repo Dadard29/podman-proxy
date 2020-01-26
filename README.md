@@ -27,8 +27,11 @@ podman-proxy uses the [podman golang methods](https://github.com/containers/libp
 
 Install the podman-proxy package :
 ```shell script
+go get github.com/Dadard29/podman-proxy
 go install github.com/Dadard29/podman-proxy
 ```
+
+You need to install this go package as root if you want to use it as a systemd service.
 
 Create a unit file for systemd:
 ```shell script
@@ -45,4 +48,9 @@ Documentation=http://git.dadard.fr/go-dadard/go-podman-proxy.git
 
 [Service]
 ExecStart=/home/<login>/go/bin/podman-proxy
+```
+
+```shell script
+systemctl start podman-proxy
+systemctl status podman-proxy
 ```

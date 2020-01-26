@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"go/build"
 	"log"
 )
 
@@ -20,8 +21,12 @@ func (RuleModel) TableName() string {
 }
 
 func newConnector() *gorm.DB {
-	// FIXME
-	db, err := gorm.Open("sqlite3", "/home/dadard/go/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db")
+	home := build.Default.GOPATH
+	fmt.Println(home)
+
+	dbPath := fmt.Sprintf("%s/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db", home)
+
+	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -70,22 +75,6 @@ func (a *Api) CreateRule(containerName string, containerPort int, containerHost 
 		return defaultRule, err
 	}
 
-	//portsExposed, err := con.PortMappings()
-	//if err != nil {
-	//	return defaultRule, err
-	//}
-
-	//found := false
-	//for _, p := range portsExposed {
-	//	if int (p.ContainerPort) == containerPort {
-	//		found = true
-	//	}
-	//}
-	//
-	//if ! found {
-	//	return defaultRule, errors.New(fmt.Sprintf("this port (%d) is not exposed by the container", containerPort))
-	//}
-
 	newRule := RuleModel{
 		ContainerName: containerName,
 		ContainerHost: containerHost,
@@ -114,10 +103,37 @@ func (a *Api) DeleteRule(containerHost string) (RuleModel, error) {
 	// check if the rule has correctly been retrieved; else, all record could be deleted:
 	// https://gorm.io/docs/delete.html
 
-	if rule.ContainerName == "" {
+	if rule.ContainerHost == "" {
 		return rule, errors.New("malformed rule retrieved: container name blank")
 	}
 
 	a.connector.Delete(&rule)
+	return rule, nil
+}
+
+func (a *Api) UpdateRule(containerHost string, containerName string, containerPort int) (RuleModel, error) {
+	defaultRule := RuleModel{}
+
+	rule, err := a.GetRule(containerHost)
+	if err != nil {
+		return rule, err
+	}
+
+	con, err := a.GetContainerFromLibpod(containerName)
+	if err != nil {
+		return defaultRule, err
+	}
+
+	containerIp, err := a.GetContainerIp(con)
+	if err != nil {
+		return defaultRule, err
+	}
+
+
+	rule.ContainerIp = containerIp
+	rule.ContainerName = containerName
+	rule.ContainerPort = containerPort
+
+	a.connector.Save(&rule)
 	return rule, nil
 }

@@ -57,7 +57,7 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodDelete {
 		res, httpStatusCode = rulesHandlerDelete(req)
 	} else if r.Method == http.MethodPut {
-		res, httpStatusCode = rulesHandlerPut(r)
+		res, httpStatusCode = rulesHandlerPut(req)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		res = response{
@@ -157,6 +157,29 @@ func rulesHandlerDelete(r request) (response, int) {
 	}, http.StatusOK
 }
 
-func rulesHandlerPut(r *http.Request) (response, int) {
-	return response{}, http.StatusNotImplemented
+func rulesHandlerPut(r request) (response, int) {
+	// need host, name and port fulfilled
+
+	defaultResponse := response{
+		Status:  false,
+		Message: "",
+		Rule: RuleModel{
+			ContainerName: r.ContainerName,
+			ContainerHost: r.ContainerHost,
+			ContainerPort: r.ContainerPort,
+		},
+	}
+
+	rule, err := globalApi.UpdateRule(r.ContainerHost, r.ContainerName, r.ContainerPort)
+	if err != nil {
+		log.Println(err)
+		defaultResponse.Message = err.Error()
+		return defaultResponse, http.StatusInternalServerError
+	}
+
+	return response{
+		Status:  true,
+		Message: "rule updated",
+		Rule:    rule,
+	}, http.StatusOK
 }
