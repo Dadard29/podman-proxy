@@ -7,6 +7,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go/build"
 	"log"
+	"os"
 )
 
 type RuleModel struct {
@@ -22,9 +23,13 @@ func (RuleModel) TableName() string {
 
 func newConnector() *gorm.DB {
 	home := build.Default.GOPATH
-	fmt.Println(home)
-
-	dbPath := fmt.Sprintf("%s/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db", home)
+	var dbPath string
+	if home != "" {
+		dbPath = fmt.Sprintf("%s/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db", home)
+ 	} else {
+		dbPath = os.Getenv("PODMAN_PROXY_DB")
+	}
+	log.Println(dbPath)
 
 	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
