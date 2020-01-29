@@ -23,34 +23,18 @@ I choose to use systemd instead, to run the proxy.
 
 podman-proxy uses the [podman golang methods](https://github.com/containers/libpod) to access the containers infos.
 
+## Installation
+
+- install this go package
+- setup the systemd unit file
+
 ## Usage
-
-Install the podman-proxy package :
-```shell script
-go get github.com/Dadard29/podman-proxy
-go install github.com/Dadard29/podman-proxy
-```
-
-You need to install this go package as root if you want to use it as a systemd service.
-
-Create a unit file for systemd:
-```shell script
-systemctl edit podman-proxy
-```
-
-Setup the unit file (it will only run the `podman-proxy` binary file). More infos and details in the awesome [Archlinux Wiki](https://wiki.archlinux.org/index.php/Systemd).
-
-Dont forget to update the `podman-proxy` binary path with your login.
-```
-[Unit]
-Description=podman-proxy service to manage containers hostname
-Documentation=http://git.dadard.fr/go-dadard/go-podman-proxy.git
-
-[Service]
-ExecStart=/home/<login>/go/bin/podman-proxy
-```
 
 ```shell script
 systemctl start podman-proxy
 systemctl status podman-proxy
 ```
+
+- [Getting started]()
+- [API documentation]()
+ 

@@ -12,6 +12,7 @@ type responseRulesList struct {
 	Rule []RuleModel
 }
 
+// controller for the /rules/list endpoint
 func rulesListHandler(w http.ResponseWriter, r *http.Request) {
 	var res responseRulesList
 	var httpStatusCode int
@@ -38,7 +39,22 @@ func rulesListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
+// swagger:route GET /rules/list rules list listRule
+//
+// List the stored rules
+//
+// This will extract all rules details from the database
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       200: basicResponse
 func rulesHandlerGetList() (responseRulesList, int) {
 	rulesList, err := globalApi.ListRules()
 	if err != nil {

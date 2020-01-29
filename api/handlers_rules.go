@@ -7,18 +7,7 @@ import (
 	"net/http"
 )
 
-type response struct {
-	Status  bool
-	Message string
-	Rule    RuleModel
-}
-
-type request struct {
-	ContainerHost string
-	ContainerName string
-	ContainerPort int
-}
-
+// controller for the /rules endpoint
 func rulesHandler(w http.ResponseWriter, r *http.Request) {
 	var res response
 	var httpStatusCode int
@@ -74,6 +63,22 @@ func rulesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// swagger:route POST /rules rules createRule
+//
+// Create a rule mapping an hostname and a podman container
+//
+// This will create a new rule.
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       200: basicResponse
 func rulesHandlerPost(r request) (response, int) {
 	// need name, host and port fulfilled
 
@@ -101,6 +106,22 @@ func rulesHandlerPost(r request) (response, int) {
 	}, http.StatusOK
 }
 
+// swagger:route GET /rules rules getRule
+//
+// Retrieve a rule details
+//
+// This will extract rule details from the database
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       200: basicResponse
 func rulesHandlerGet(r request) (response, int) {
 	// need host fulfilled
 
@@ -126,6 +147,22 @@ func rulesHandlerGet(r request) (response, int) {
 	}, http.StatusOK
 }
 
+// swagger:route DELETE /rules rules deleteRule
+//
+// Delete a rule
+//
+// This will remove a rule
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       200: basicResponse
 func rulesHandlerDelete(r request) (response, int) {
 	// need host fulfilled
 
@@ -151,6 +188,23 @@ func rulesHandlerDelete(r request) (response, int) {
 	}, http.StatusOK
 }
 
+// swagger:route PUT /rules rules updateRule
+//
+// Update a rule concerning a specific container
+//
+// This will update the IP, the container name, the container port
+// and the host, in the rule.
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       200: basicResponse
 func rulesHandlerPut(r request) (response, int) {
 	// need host, name and port fulfilled
 

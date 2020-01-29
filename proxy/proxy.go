@@ -20,6 +20,16 @@ type Proxy struct {
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
+	// check the auth
+	// the auth key must be in the `Authorization` header, with the value `Bearer <key>`
+	authorizationHeader := r.Header.Get("Authorization")
+	authorizationKey := strings.Trim(authorizationHeader, "Bearer ")
+
+	if authorizationKey != globalProxy.config.ProxyToken {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	// redirect the request to the correct handler
 	for u, h := range globalProxy.exposedApi.GetRoutes() {
 		if u == r.URL.String() && checkMethod(h.HttpMethods, r.Method) {

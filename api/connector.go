@@ -29,12 +29,13 @@ func newConnector() *gorm.DB {
  	} else {
 		dbPath = os.Getenv("PODMAN_PROXY_DB")
 	}
-	log.Println(dbPath)
 
 	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	log.Println(fmt.Sprintf("connected to db %s", dbPath))
 
 	return db
 }
