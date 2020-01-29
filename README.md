@@ -21,12 +21,14 @@ Then, you cannot use a container to setup a proxy, since there is no conventiona
 
 I choose to use systemd instead, to run the proxy.
 
-podman-proxy uses the [podman golang methods](https://github.com/containers/libpod) to access the containers infos.
+`podman-proxy` uses the [podman golang methods](https://github.com/containers/libpod) to access the containers infos.
 
 ## Installation
 
 - install this go package
 - setup the systemd unit file
+
+[Installation details](https://github.com/Dadard29/podman-proxy/blob/master/docs/installation.md)
 
 ## Usage
 
@@ -35,6 +37,6 @@ systemctl start podman-proxy
 systemctl status podman-proxy
 ```
 
-- [Getting started]()
-- [API documentation]()
+- [Getting started](https://github.com/Dadard29/podman-proxy/blob/master/docs/overall.md)
+- [API documentation](https://github.com/Dadard29/podman-proxy/blob/master/docs/api.md)
  
