@@ -5,7 +5,7 @@ The podman-proxy redirect HTTP traffic to podman containers.
 
 As the service run with the root user, podman containers must be managed by root.
 
-![schema]()
+![schema](https://raw.githubusercontent.com/Dadard29/podman-proxy/master/docs/images/podman-proxy.svg)
 
 ## Example
 
@@ -79,7 +79,7 @@ Finally, just request the container with the hostname you've set in the rule.
 Don't forget to set the HTTP port exposed by the proxy.
  
 ```shell script
-root@host# curl -I server-host:80
+root@host# curl server-host:80
 I'm cbb93902d86f
 ```
 
