@@ -49,37 +49,77 @@ For this example, we gonna take:
 
 You can request the exposed API this way:
 ```shell script
-root@host# curl -I podman-proxy-host:80/rules/list
+root@host# curl -i podman-proxy-host:80/rules/list
 HTTP/1.1 401 Unauthorized
 Date: Wed, 29 Jan 2020 15:52:35 GMT
+Content-Length: 0
 
 ```
+
+### Authentication
 
 A `401 Unauthorized` response should be raised.
-For every request you make to the API, you need to specify a value for the `Authorization` header.
+For every request you make to the API, you need to specify a Bearer token for the `Authorization` header.
 
-setup auth
-token: 7Jw6NOeRvaIbvLaeoOuHWFdJfg1Ix1dxs9GttQc855E=
-
-Retry your call now with the token in the `Authorization` header :
+To get this token, you need to use the secret, and send it to the endpoint `/auth`:
 ```shell script
-root@host# curl -I -H "Authorization: Bearer ec9c3a34e791bda21bbcb69ea0eb875857497e0d48c75771b3d1adb5073ce791" podman-proxy-host:80/rules/list
+root@host# curl -i -d `{"Secret": "<your_secret>"}` podman-proxy-host:80/auth
 HTTP/1.1 200 OK
-Date: Wed, 29 Jan 2020 15:56:11 GMT
-Content-Type: application/json
-Content-Length: 372
+Date: Thu, 30 Jan 2020 10:47:23 GMT
+Content-Length: 64
+Content-Type: text/plain; charset=utf-8
 
+<the_api_token>
 ```
 
-create rule
+
+Then, retry your call with the token in the `Authorization` header :
+```shell script
+root@host# curl -i -H "Authorization: Bearer <the_api_token>" podman-proxy-host:80/rules/list
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Thu, 30 Jan 2020 10:52:00 GMT
+Content-Length: 372
+
+{
+  "Status": true,
+  "Message": "rule list retrieved",
+  "Rule": []
+}
+```
+
+The authentication is working !
+
+### Rule creation
+```shell script
+root@host# curl -i -d '{"ContainerName": "server_1", "ContainerHost": "server-1-host", "ContainerPort": 8000}' -H "Authorization: Bearer <your_api_token>" podman-proxy-host/rules
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Thu, 30 Jan 2020 11:07:50 GMT
+Content-Length: 159
+
+{
+  "Status": true,
+  "Message": "rule created",
+  "Rule": {
+    "ContainerHost": "server-1-host",
+    "ContainerName": "server_1",
+    "ContainerIp": "10.88.0.2",
+    "ContainerPort": 8000
+  }
+}
+```
+
+You can set several rules for the same container. It means the container can be reached by different hostnames.
+
 
 ### Container
 
 Finally, just request the container with the hostname you've set in the rule.
-Don't forget to set the HTTP port exposed by the proxy.
+Don't forget to set the HTTP port exposed by the proxy (in this case, 80).
  
 ```shell script
-root@host# curl server-host:80
+root@host# curl server-1-host:80
 I'm cbb93902d86f
 ```
 

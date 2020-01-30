@@ -47,5 +47,6 @@ If not set, the api will be exposed through the port 8080.
 - Set the the `PODMAN_PROXY_SECRET` value to setup the authentication token.
 This variable MUST be set, otherwise the service won't start.
 This secret will be use to generate the authentication token of the api. Do not share it.
+Use a strong secret with special characters and numbers
 
 More infos and details in the awesome [Archlinux Wiki](https://wiki.archlinux.org/index.php/Systemd) about systemd configuration.
