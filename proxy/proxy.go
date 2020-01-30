@@ -1,8 +1,10 @@
 package proxy
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Dadard29/podman-proxy/api"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -19,13 +21,67 @@ type Proxy struct {
 	config     Config
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request) {
-	// check the auth
+const authRoute = "/auth"
+
+// if the given secret is correct, give the associated token
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	var payload map[string]string
+	err = json.Unmarshal(data, &payload)
+	if err != nil {
+		log.Println(err)
+	}
+
+	secret := payload["Secret"]
+
+	givenToken := globalProxy.config.generateToken(secret)
+	if givenToken != globalProxy.config.ProxyToken {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(givenToken))
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// check if the given token is correct
+func checkAuthToken(r *http.Request) bool {
 	// the auth key must be in the `Authorization` header, with the value `Bearer <key>`
 	authorizationHeader := r.Header.Get("Authorization")
-	authorizationKey := strings.Trim(authorizationHeader, "Bearer ")
+	if authorizationHeader == "" {
+		return false
+	}
 
-	if authorizationKey != globalProxy.config.ProxyToken {
+	values := strings.Split(authorizationHeader, "Bearer ")
+	if len(values) != 2 {
+		return false
+	}
+
+	authorizationKey := values[1]
+
+	log.Println(fmt.Sprintf("received %s, expecting %s", authorizationKey, globalProxy.config.ProxyToken))
+
+	return authorizationKey == globalProxy.config.ProxyToken
+}
+
+// send the http request to the required handler
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+	// check if redirect to auth handler or not
+	if r.URL.String() == authRoute {
+		authHandler(w, r)
+		return
+	}
+
+	if ! checkAuthToken(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -46,6 +102,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// redirect the HTTP traffic to the podman container
 func redirectionHandler(w http.ResponseWriter, r *http.Request) {
 	splitted := strings.Split(r.Host, ":")
 	var requestedHost = splitted[0]
@@ -75,8 +132,7 @@ func redirectionHandler(w http.ResponseWriter, r *http.Request) {
 	proxyService.ServeHTTP(w, r)
 }
 
-// this handler will redirect the requests to the container
-// this is the proxy
+// check if the request is addressed to the API or the container
 func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Host == globalProxy.config.getAddr() {
 		apiHandler(w, r)
@@ -86,6 +142,7 @@ func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// proxy constructor
 func NewProxy(conf Config) *Proxy {
 	proxyUrl := fmt.Sprintf("%s:%d", conf.ProxyHost, conf.ProxyPort)
 
@@ -120,6 +177,7 @@ func NewProxy(conf Config) *Proxy {
 	return p
 }
 
+// the http server of the proxy
 func (p *Proxy) Start() {
 	log.Printf("listening on %s...\n", p.httpServer.Addr)
 	err := p.httpServer.ListenAndServe()
