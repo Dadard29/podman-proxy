@@ -15,6 +15,7 @@ It allows you to perform CRUD operations on the rules database.
 | /rules      | PUT    | update rule   |
 | /rules      | DELETE | remove rule   |
 | /rules/list | GET    | list rules    |
+| /auth       | POST   | generate token|
 
 
 ## Swagger
