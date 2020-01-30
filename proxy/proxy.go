@@ -27,6 +27,11 @@ const authRoute = "/auth"
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatalln(err)
@@ -67,8 +72,6 @@ func checkAuthToken(r *http.Request) bool {
 	}
 
 	authorizationKey := values[1]
-
-	log.Println(fmt.Sprintf("received %s, expecting %s", authorizationKey, globalProxy.config.ProxyToken))
 
 	return authorizationKey == globalProxy.config.ProxyToken
 }
