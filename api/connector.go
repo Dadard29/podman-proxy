@@ -68,7 +68,7 @@ func (a *Api) CreateRule(containerName string, containerPort int, containerHost 
 	defaultRule := RuleModel{}
 
 	if _, check := a.checkRuleExistsFromHostname(containerHost); check {
-		return defaultRule, errors.New(fmt.Sprintf("a rule for the container with name %s already exists", containerName))
+		return defaultRule, errors.New(fmt.Sprintf("a rule for the container with hostname %s already exists", containerHost))
 	}
 
 	con, err := a.GetContainerFromLibpod(containerName)
