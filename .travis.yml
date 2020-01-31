@@ -1,1 +1,7 @@
 language: go
+
+addons:
+  apt:
+    packages:
+      - libgpgme-dev
+      - podman
