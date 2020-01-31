@@ -10,16 +10,16 @@ import (
 )
 
 const (
-	proxyHostKey = "PODMAN_PROXY_HOST"
-	proxyPortKey = "PODMAN_PROXY_PORT"
+	proxyHostKey   = "PODMAN_PROXY_HOST"
+	proxyPortKey   = "PODMAN_PROXY_PORT"
 	proxySecretKey = "PODMAN_PROXY_SECRET"
 )
 
 type Config struct {
 	// the host which will not be redirected to podman container
 	// the api will be available through this host
-	ProxyHost string `json:"proxy_host"`
-	ProxyPort int `json:"proxy_port"`
+	ProxyHost  string `json:"proxy_host"`
+	ProxyPort  int    `json:"proxy_port"`
 	ProxyToken string `json:"proxy_token"`
 }
 
@@ -48,8 +48,8 @@ func getDefaultConfig() Config {
 	defaultProxyToken := "default-token"
 
 	return Config{
-		ProxyHost: defaultProxyHost,
-		ProxyPort: defaultProxyPort,
+		ProxyHost:  defaultProxyHost,
+		ProxyPort:  defaultProxyPort,
 		ProxyToken: defaultProxyToken, // MUST be fulfilled by the user
 	}
 }

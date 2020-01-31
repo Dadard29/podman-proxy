@@ -84,7 +84,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ! checkAuthToken(r) {
+	if !checkAuthToken(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -99,7 +99,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 
 	// no valid handler found for this route and this http method
 	w.WriteHeader(http.StatusNotFound)
-	_, err := w.Write([]byte (fmt.Sprintf("%d %s\n", http.StatusNotFound, "custom page not found")))
+	_, err := w.Write([]byte(fmt.Sprintf("%d %s\n", http.StatusNotFound, "custom page not found")))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -173,7 +173,7 @@ func NewProxy(conf Config) *Proxy {
 	p := &Proxy{
 		exposedApi: exposeApi,
 		httpServer: server,
-		config: conf,
+		config:     conf,
 	}
 
 	globalProxy = p
@@ -189,5 +189,3 @@ func (p *Proxy) Start() {
 		log.Fatalln(err)
 	}
 }
-
-

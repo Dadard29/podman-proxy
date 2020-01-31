@@ -26,7 +26,7 @@ func newConnector() *gorm.DB {
 	var dbPath string
 	if home != "" {
 		dbPath = fmt.Sprintf("%s/src/github.com/Dadard29/podman-proxy/api/db/podman-proxy.db", home)
- 	} else {
+	} else {
 		dbPath = os.Getenv("PODMAN_PROXY_DB")
 	}
 
@@ -93,7 +93,7 @@ func (a *Api) CreateRule(containerName string, containerPort int, containerHost 
 }
 
 func (a *Api) GetRule(containerHost string) (RuleModel, error) {
-	if rule, check := a.checkRuleExistsFromHostname(containerHost); ! check {
+	if rule, check := a.checkRuleExistsFromHostname(containerHost); !check {
 		return rule, errors.New(fmt.Sprintf("a rule with hostname %s has not been found", containerHost))
 	} else {
 		return rule, nil
@@ -134,7 +134,6 @@ func (a *Api) UpdateRule(containerHost string, containerName string, containerPo
 	if err != nil {
 		return defaultRule, err
 	}
-
 
 	rule.ContainerIp = containerIp
 	rule.ContainerName = containerName

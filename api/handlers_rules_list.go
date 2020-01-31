@@ -7,9 +7,9 @@ import (
 )
 
 type responseRulesList struct {
-	Status bool
+	Status  bool
 	Message string
-	Rule []RuleModel
+	Rule    []RuleModel
 }
 
 // controller for the /rules/list endpoint

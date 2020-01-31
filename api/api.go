@@ -10,9 +10,9 @@ import (
 var globalApi *Api
 
 type Api struct {
-	connector *gorm.DB
+	connector     *gorm.DB
 	libpodRuntime *libpod.Runtime
-	routes map[string]Route
+	routes        map[string]Route
 }
 
 // api object to be used by the api handlers
@@ -35,7 +35,7 @@ func NewApi() *Api {
 		},
 	}
 
-	a :=&Api{
+	a := &Api{
 		connector:     con,
 		libpodRuntime: runtime,
 		routes:        routes,
@@ -51,7 +51,6 @@ func (a *Api) Close() {
 		log.Fatalln(err)
 	}
 }
-
 
 func (a *Api) GetRoutes() map[string]Route {
 	return a.routes

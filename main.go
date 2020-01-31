@@ -11,4 +11,3 @@ func main() {
 	// blocking method (run the proxy http server)
 	p.Start()
 }
-

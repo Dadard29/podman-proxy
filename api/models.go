@@ -4,19 +4,19 @@ import "net/http"
 
 type Route struct {
 	HttpMethods []string
-	Handler func(w http.ResponseWriter, r *http.Request)
+	Handler     func(w http.ResponseWriter, r *http.Request)
 }
 
 // swagger:response basicResponse
 type response struct {
 	// the status of the operation
-	Status  bool `json:"Status"`
+	Status bool `json:"Status"`
 
 	// a detailed message about the operation status
 	Message string `json:"Message"`
 
 	// the rule model if applicable
-	Rule    RuleModel `json:"Rule"`
+	Rule RuleModel `json:"Rule"`
 }
 
 // the request model
