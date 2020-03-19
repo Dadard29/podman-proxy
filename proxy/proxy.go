@@ -159,7 +159,8 @@ func NewProxy(conf Config) *Proxy {
 		Cache:           autocert.DirCache("/srv/https/certificates"),
 		HostPolicy:      autocert.HostWhitelist(
 			"dadard.fr", "www.dadard.fr",
-			"proxy.dadard.fr", "www.proxy.dadard.fr"),
+			"proxy.dadard.fr", "www.proxy.dadard.fr",
+			"core.dadard.fr", "www.core.dadard.fr"),
 	}
 
 	server := &http.Server{
