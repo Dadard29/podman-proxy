@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func newLibpodRuntime() *libpod.Runtime {
+func NewLibpodRuntime() *libpod.Runtime {
 	c := context.Background()
 	runtime, err := libpod.NewRuntime(c)
 	if err != nil {
