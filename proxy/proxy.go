@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Dadard29/podman-proxy/api"
+	"golang.org/x/crypto/acme/autocert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -147,15 +148,22 @@ func mainProxyHandler(w http.ResponseWriter, r *http.Request) {
 
 // proxy constructor
 func NewProxy(conf Config) *Proxy {
-	proxyUrl := fmt.Sprintf("%s:%d", conf.ProxyHost, conf.ProxyPort)
+	//proxyUrl := fmt.Sprintf("%s:%d", conf.ProxyHost, conf.ProxyPort)
 
 	// setup the main proxy route
 	http.HandleFunc("/", mainProxyHandler)
 
+	// tls
+	manager := autocert.Manager{
+		Prompt:          autocert.AcceptTOS,
+		Cache:           autocert.DirCache("/srv/https/certificates"),
+		HostPolicy:      autocert.HostWhitelist("dadard.fr", "www.dadard.fr"),
+	}
+
 	server := &http.Server{
-		Addr:              proxyUrl,
+		Addr:              ":https",
 		Handler:           nil,
-		TLSConfig:         nil,
+		TLSConfig:         manager.TLSConfig(),
 		ReadTimeout:       0,
 		ReadHeaderTimeout: 0,
 		WriteTimeout:      0,
@@ -183,7 +191,7 @@ func NewProxy(conf Config) *Proxy {
 // the http server of the proxy
 func (p *Proxy) Start() {
 	log.Printf("listening on %s...\n", p.httpServer.Addr)
-	err := p.httpServer.ListenAndServe()
+	err := p.httpServer.ListenAndServeTLS("", "")
 
 	if err != nil {
 		log.Fatalln(err)
