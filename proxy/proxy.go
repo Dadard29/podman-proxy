@@ -153,14 +153,14 @@ func NewProxy(conf Config) *Proxy {
 	// setup the main proxy route
 	http.HandleFunc("/", mainProxyHandler)
 
+	// log domains for TLS
+	log.Printf("setting up TLS for domains: %v\n", conf.ProxyHostWhitelist)
+
 	// tls
 	manager := autocert.Manager{
 		Prompt:          autocert.AcceptTOS,
 		Cache:           autocert.DirCache("/srv/https/certificates"),
-		HostPolicy:      autocert.HostWhitelist(
-			"dadard.fr", "www.dadard.fr",
-			"proxy.dadard.fr", "www.proxy.dadard.fr",
-			"core.dadard.fr", "www.core.dadard.fr"),
+		HostPolicy:      autocert.HostWhitelist(conf.ProxyHostWhitelist...),
 	}
 
 	server := &http.Server{

@@ -7,12 +7,14 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
 	proxyHostKey   = "PODMAN_PROXY_HOST"
 	proxyPortKey   = "PODMAN_PROXY_PORT"
 	proxySecretKey = "PODMAN_PROXY_SECRET"
+	proxyHostWhitelistKey = "PODMAN_PROXY_HOST_WHITELIST"
 )
 
 type Config struct {
@@ -21,6 +23,7 @@ type Config struct {
 	ProxyHost  string `json:"proxy_host"`
 	ProxyPort  int    `json:"proxy_port"`
 	ProxyToken string `json:"proxy_token"`
+	ProxyHostWhitelist []string `json:"proxy_host_whitelist"`
 }
 
 func (c Config) getAddr() string {
@@ -47,10 +50,13 @@ func getDefaultConfig() Config {
 
 	defaultProxyToken := "default-token"
 
+	defaultHostWhitelist := make([]string, 0)
+
 	return Config{
 		ProxyHost:  defaultProxyHost,
 		ProxyPort:  defaultProxyPort,
 		ProxyToken: defaultProxyToken, // MUST be fulfilled by the user
+		ProxyHostWhitelist: defaultHostWhitelist,
 	}
 }
 
@@ -76,6 +82,14 @@ func RetrieveConfig() Config {
 	} else {
 		log.Fatalln(
 			fmt.Sprintf("You need to specify a secret into the environment variable %s !", proxySecretKey))
+	}
+
+	if proxyHostWhitelistRaw := os.Getenv(proxyHostWhitelistKey); proxyHostWhitelistRaw != "" {
+		proxyHostWhitelist := strings.Split(proxyHostWhitelistRaw, ",")
+		for _, s := range proxyHostWhitelist {
+			c.ProxyHostWhitelist = append(c.ProxyHostWhitelist, s)
+			c.ProxyHostWhitelist = append(c.ProxyHostWhitelist, fmt.Sprintf("www.%s", s))
+		}
 	}
 
 	return c
