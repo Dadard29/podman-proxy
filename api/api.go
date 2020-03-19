@@ -22,7 +22,7 @@ type Api struct {
 func NewApi() *Api {
 	con := newConnector()
 
-	runtime := NewLibpodRuntime()
+	runtime := newLibpodRuntime()
 
 	routes := map[string]Route{
 		"/rules": {
