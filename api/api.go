@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/containers/libpod/libpod"
-	"github.com/jinzhu/gorm"
-	"log"
+	_ "gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -45,17 +45,6 @@ func NewApi() *Api {
 	return a
 }
 
-func (a *Api) Close() {
-	err := a.connector.Close()
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
 func (a *Api) GetRoutes() map[string]Route {
 	return a.routes
-}
-
-func (a *Api) PingDb() bool {
-	return a.connector.DB().Ping() == nil
 }
