@@ -3,9 +3,10 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go/build"
+	"gorm.io/driver/sqlite"
+	_ "gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"log"
 	"os"
 )
@@ -30,7 +31,7 @@ func newConnector() *gorm.DB {
 		dbPath = os.Getenv("PODMAN_PROXY_DB")
 	}
 
-	db, err := gorm.Open("sqlite3", dbPath)
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
 	}
