@@ -17,6 +17,7 @@ type Proxy struct {
 	db     *db.Db
 	logger *log.Logger
 	server *http.Server
+	router *mux.Router
 }
 
 func getConfigFromEnv() (config, error) {
@@ -85,16 +86,26 @@ func NewProxy() (*Proxy, error) {
 		db:     proxyDb,
 		logger: logger,
 		server: nil,
+		router: nil,
 	}
+
+	router := mux.NewRouter()
+	router.HandleFunc("/rule", proxy.rulesHandler).Methods(http.MethodGet)
+	router.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet)
+	router.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet)
+	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+
+	proxy.router = router
 
 	return proxy, nil
 }
 
 func (p *Proxy) Serve(withTLS bool) error {
 
-	// fixme
 	router := mux.NewRouter()
-	router.HandleFunc("/", p.switcher).Methods("GET")
+	router.PathPrefix("/").HandlerFunc(p.switcher)
 	router.Use(p.dbLoggingMiddleware)
 
 	p.logger.Printf("Starting proxy server on %s...\n", p.config.addr)

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/Dadard29/podman-proxy/models"
@@ -52,6 +53,10 @@ func (db *Db) GetRuleFromDomainName(domainName string) (models.Rule, error) {
 		fmt.Sprintf("select * from %s where domain_name == ?", ruleTableName),
 		domainName,
 	)
+
+	if row.Err() == sql.ErrNoRows {
+		return models.Rule{}, fmt.Errorf("no rule found with dn: %s", domainName)
+	}
 
 	return models.NewRule(row.Scan)
 }

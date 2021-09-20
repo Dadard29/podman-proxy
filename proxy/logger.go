@@ -50,6 +50,8 @@ func (p *Proxy) dbLoggingMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			p.logger.Println(err)
 		}
+
+		p.logger.Printf("%d %s %s %s", netLog.ResponseStatusCode, r.Method, r.Host, r.URL.Path)
 	}
 
 	return http.HandlerFunc(fn)
