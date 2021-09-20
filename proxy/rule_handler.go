@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -16,8 +15,7 @@ func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, _ := json.Marshal(rules)
-	w.Write(res)
+	p.WriteJson(w, &rules)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -31,8 +29,7 @@ func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
 		return
 	}
 
-	res, _ := json.Marshal(&rule)
-	w.Write(res)
+	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -53,8 +50,7 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 		return
 	}
 
-	res, _ := json.Marshal(&rule)
-	w.Write(res)
+	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -74,8 +70,7 @@ func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 		return
 	}
 
-	res, _ := json.Marshal(&rule)
-	w.Write(res)
+	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
 }
 

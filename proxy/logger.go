@@ -35,8 +35,6 @@ func (p *Proxy) dbLoggingMiddleware(next http.Handler) http.Handler {
 		responseLog := NewLogResponseWriter(w)
 		beganAt := time.Now()
 
-		time.Sleep(23 * time.Millisecond)
-
 		next.ServeHTTP(responseLog, r)
 
 		duration := time.Since(beganAt)
@@ -51,7 +49,7 @@ func (p *Proxy) dbLoggingMiddleware(next http.Handler) http.Handler {
 			p.logger.Println(err)
 		}
 
-		p.logger.Printf("%d %s %s %s", netLog.ResponseStatusCode, r.Method, r.Host, r.URL.Path)
+		p.logger.Printf("%d %s %s %s %s", netLog.ResponseStatusCode, r.Method, r.Host, r.URL.Host, r.URL.Path)
 	}
 
 	return http.HandlerFunc(fn)
