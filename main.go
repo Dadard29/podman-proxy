@@ -15,13 +15,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// log.Println("* Starting upgrader goroutine")
-	// go func() {
-	// 	err := p.UpgraderServe()
-	// 	if err != nil && err != http.ErrServerClosed {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
+	log.Println("* Starting upgrader goroutine")
+	go func() {
+		err := p.UpgraderServe()
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
 
 	log.Println("* Starting proxy goroutine")
 	go func() {
