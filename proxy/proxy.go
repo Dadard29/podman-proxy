@@ -20,31 +20,19 @@ type Proxy struct {
 	router *mux.Router
 }
 
-func getConfigFromEnv() (config, error) {
-	proxyHost := os.Getenv(envProxyHost)
-	dbPath := os.Getenv(envDbPath)
-	addr := os.Getenv(envAddr)
-
-	if proxyHost == "" {
-		return config{}, fmt.Errorf("env variable not set: %s", envProxyHost)
-	}
-	if dbPath == "" {
-		return config{}, fmt.Errorf("env variable not set: %s", envDbPath)
-	}
-	if addr == "" {
-		return config{}, fmt.Errorf("env variable not set: %s", envAddr)
-	}
-
-	proxyConfig := config{
-		proxyHost: proxyHost,
-		dbPath:    dbPath,
-		addr:      addr,
-	}
-
-	return proxyConfig, nil
+func (p *Proxy) getAddrFromProxyPort() string {
+	return fmt.Sprintf(":%d", p.config.proxyPort)
 }
 
-func newHttpsServer(addr string, domainNames ...string) *http.Server {
+func (p *Proxy) Host() string {
+	if p.config.proxyPort == 80 || p.config.proxyPort == 443 {
+		return p.config.proxyHost
+	} else {
+		return fmt.Sprintf("%s:%d", p.config.proxyHost, p.config.proxyPort)
+	}
+}
+
+func (p *Proxy) newHttpsServer(domainNames ...string) *http.Server {
 	// tls
 	manager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -52,6 +40,8 @@ func newHttpsServer(addr string, domainNames ...string) *http.Server {
 		HostPolicy: autocert.HostWhitelist(domainNames...),
 	}
 
+	// server
+	addr := p.getAddrFromProxyPort()
 	server := &http.Server{
 		Addr:      addr,
 		TLSConfig: manager.TLSConfig(),
@@ -61,7 +51,10 @@ func newHttpsServer(addr string, domainNames ...string) *http.Server {
 	return server
 }
 
-func newHttpServer(addr string) *http.Server {
+func (p *Proxy) newHttpServer() *http.Server {
+
+	// server
+	addr := p.getAddrFromProxyPort()
 	return &http.Server{
 		Addr:     addr,
 		ErrorLog: log.New(os.Stdout, "podman-proxy-error ", log.Ldate|log.Ltime),
@@ -69,7 +62,7 @@ func newHttpServer(addr string) *http.Server {
 }
 
 func NewProxy() (*Proxy, error) {
-	config, err := getConfigFromEnv()
+	config, err := newConfigFromEnv()
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +101,7 @@ func (p *Proxy) Serve(withTLS bool) error {
 	router.PathPrefix("/").HandlerFunc(p.switcher)
 	router.Use(p.dbLoggingMiddleware)
 
-	p.logger.Printf("Starting proxy server on %s...\n", p.config.addr)
+	p.logger.Printf("Starting proxy server on %s...\n", p.Host())
 
 	if withTLS {
 		// get the list of domain names to register
@@ -123,14 +116,14 @@ func (p *Proxy) Serve(withTLS bool) error {
 		}
 
 		// configure the HTTPs server
-		p.server = newHttpsServer(p.config.addr, domainNamesListStr...)
+		p.server = p.newHttpsServer(domainNamesListStr...)
 		p.server.Handler = router
 		err = p.server.ListenAndServeTLS("", "")
 		return err
 
 	} else {
 		// configure the HTTP server
-		p.server = newHttpServer(p.config.addr)
+		p.server = p.newHttpServer()
 		p.server.Handler = router
 		err := p.server.ListenAndServe()
 		return err

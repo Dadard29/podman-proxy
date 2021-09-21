@@ -65,7 +65,7 @@ func (p *Proxy) redirectToProxyApi(w http.ResponseWriter, r *http.Request) {
 
 // Main proxy entrypoint
 func (p *Proxy) switcher(w http.ResponseWriter, r *http.Request) {
-	if r.Host == p.config.proxyHost {
+	if r.Host == p.Host() {
 		p.redirectToProxyApi(w, r)
 
 	} else {

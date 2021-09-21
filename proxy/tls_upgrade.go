@@ -15,12 +15,13 @@ func (p *Proxy) upgrader(w http.ResponseWriter, req *http.Request) {
 	}
 	p.logger.Printf("redirecting to %s...\n", target)
 	http.Redirect(w, req, target,
-		http.StatusPermanentRedirect)
+		http.StatusMovedPermanently)
 }
 
 func (p *Proxy) UpgraderServe() error {
+	// fixme
 	server := http.Server{
-		Addr:     ":80",
+		Addr:     ":9001",
 		Handler:  http.HandlerFunc(p.upgrader),
 		ErrorLog: log.New(os.Stdout, "podman-proxy-upgrader ", log.Ldate|log.Ltime),
 	}
