@@ -11,12 +11,10 @@ func (p *Proxy) domainNamesHandler(w http.ResponseWriter, r *http.Request) {
 	domainNames, err := p.db.ListDomainNames()
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &domainNames)
 }
 
@@ -24,12 +22,10 @@ func (p *Proxy) domainNameGet(w http.ResponseWriter, r *http.Request, dn string)
 	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &domainName)
 }
 
@@ -39,7 +35,6 @@ func (p *Proxy) domainNamePost(w http.ResponseWriter, r *http.Request, dn string
 	})
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -47,12 +42,10 @@ func (p *Proxy) domainNamePost(w http.ResponseWriter, r *http.Request, dn string
 	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &domainName)
 }
 
@@ -60,7 +53,6 @@ func (p *Proxy) domainNameDelete(w http.ResponseWriter, r *http.Request, dn stri
 	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -68,12 +60,10 @@ func (p *Proxy) domainNameDelete(w http.ResponseWriter, r *http.Request, dn stri
 	err = p.db.DeleteDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &domainName)
 }
 

@@ -13,6 +13,7 @@ import (
 
 func (p *Proxy) WriteJson(w http.ResponseWriter, i interface{}) {
 	res, _ := json.MarshalIndent(i, "", "    ")
+	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }
 
@@ -27,6 +28,7 @@ func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
 		Error: err.Error(),
 	}
 	res, _ := json.MarshalIndent(&errorObj, "", "     ")
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write(res)
 }
 
@@ -38,7 +40,6 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -46,7 +47,6 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	container, err := p.db.GetContainer(rule.ContainerName)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -55,7 +55,6 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	containerUrl, err := url.Parse(containerUrlStr)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}

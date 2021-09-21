@@ -55,14 +55,26 @@ func (db *Db) GetContainer(containerName string) (models.Container, error) {
 	return out, fmt.Errorf("container with name %s not found", containerName)
 }
 
-func (db *Db) InsertContainer(container models.Container) error {
+func (db *Db) InsertContainer(containerName string, containerIpAddress string) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 
 	_, err := db.conn.ExecContext(
 		ctx,
-		fmt.Sprintf("insert into %s(name, ip_address, exposed_port) values(?, ?, ?)", containerTableName),
-		container.Name, container.IpAddress, container.ExposedPort,
+		fmt.Sprintf("insert into %s(name, ip_address) values(?, ?)", containerTableName),
+		containerName, containerIpAddress,
+	)
+	return err
+}
+
+func (db *Db) UpdateContainerIpAddress(containerName string, ipAddress string) error {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	_, err := db.conn.ExecContext(
+		ctx,
+		fmt.Sprintf("update %s set ip_address = ? where name = ?", containerTableName),
+		ipAddress, containerName,
 	)
 	return err
 }

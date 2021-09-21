@@ -11,12 +11,10 @@ func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
 	rules, err := p.db.ListRules()
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &rules)
 }
 
@@ -26,12 +24,10 @@ func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &rule)
 }
 
@@ -41,7 +37,6 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 	err := p.db.InsertRule(dn, containerName)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -49,12 +44,10 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &rule)
 }
 
@@ -63,7 +56,6 @@ func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
@@ -71,12 +63,10 @@ func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 	err = p.db.DeleteRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
 		p.WriteErrorJson(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	p.WriteJson(w, &rule)
 }
 

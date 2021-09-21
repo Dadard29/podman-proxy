@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/Dadard29/podman-proxy/db"
+	"github.com/Dadard29/podman-proxy/podman"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -20,6 +21,7 @@ type Proxy struct {
 	logger *log.Logger
 	server *http.Server
 	router *mux.Router
+	podman *podman.PodmanRuntime
 }
 
 func (p *Proxy) getAddrFromProxyPort() string {
@@ -78,6 +80,11 @@ func NewProxy() (*Proxy, error) {
 
 	upgrader := NewUpgrader(config.upgraderPort)
 
+	runtime, err := podman.NewPodmanRuntime()
+	if err != nil {
+		return nil, err
+	}
+
 	proxy := &Proxy{
 		config:   config,
 		db:       proxyDb,
@@ -85,6 +92,7 @@ func NewProxy() (*Proxy, error) {
 		server:   nil,
 		router:   nil,
 		Upgrader: upgrader,
+		podman:   runtime,
 	}
 
 	router := mux.NewRouter()
@@ -92,8 +100,8 @@ func NewProxy() (*Proxy, error) {
 	router.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet)
 	router.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
-	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet)
-	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet, http.MethodPut)
+	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet)
 
 	proxy.router = router
 
