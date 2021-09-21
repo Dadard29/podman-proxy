@@ -13,6 +13,8 @@ import (
 )
 
 type Proxy struct {
+	Upgrader *Upgrader
+
 	config config
 	db     *db.Db
 	logger *log.Logger
@@ -45,7 +47,7 @@ func (p *Proxy) newHttpsServer(domainNames ...string) *http.Server {
 	server := &http.Server{
 		Addr:      addr,
 		TLSConfig: manager.TLSConfig(),
-		ErrorLog:  log.New(os.Stdout, "podman-proxy-error ", log.Ldate|log.Ltime),
+		ErrorLog:  log.New(os.Stdout, "proxy-error ", log.Ldate|log.Ltime),
 	}
 
 	return server
@@ -57,7 +59,7 @@ func (p *Proxy) newHttpServer() *http.Server {
 	addr := p.getAddrFromProxyPort()
 	return &http.Server{
 		Addr:     addr,
-		ErrorLog: log.New(os.Stdout, "podman-proxy-error ", log.Ldate|log.Ltime),
+		ErrorLog: log.New(os.Stdout, "proxy-error ", log.Ldate|log.Ltime),
 	}
 }
 
@@ -72,14 +74,17 @@ func NewProxy() (*Proxy, error) {
 		return nil, err
 	}
 
-	logger := log.New(log.Default().Writer(), "podman-proxy ", log.Default().Flags())
+	logger := log.New(log.Default().Writer(), "proxy ", log.Default().Flags())
+
+	upgrader := NewUpgrader(config.upgraderPort)
 
 	proxy := &Proxy{
-		config: config,
-		db:     proxyDb,
-		logger: logger,
-		server: nil,
-		router: nil,
+		config:   config,
+		db:       proxyDb,
+		logger:   logger,
+		server:   nil,
+		router:   nil,
+		Upgrader: upgrader,
 	}
 
 	router := mux.NewRouter()
@@ -91,6 +96,11 @@ func NewProxy() (*Proxy, error) {
 	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 
 	proxy.router = router
+
+	if proxy.config.debug {
+		proxy.logger.Println("WARNING: debug on")
+		proxy.logger.Println("WARNING: change the debug parameter for production use")
+	}
 
 	return proxy, nil
 }

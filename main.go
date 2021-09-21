@@ -17,7 +17,7 @@ func main() {
 
 	log.Println("* Starting upgrader goroutine")
 	go func() {
-		err := p.UpgraderServe()
+		err := p.Upgrader.Serve()
 		if err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

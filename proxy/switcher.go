@@ -16,6 +16,16 @@ func (p *Proxy) WriteJson(w http.ResponseWriter, i interface{}) {
 	w.Write(res)
 }
 
+func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
+	errorObj := struct {
+		Error string
+	}{
+		Error: err.Error(),
+	}
+	res, _ := json.MarshalIndent(&errorObj, "", "     ")
+	w.Write(res)
+}
+
 // Redirect the request to the container associated with the domain name used
 func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	splitted := strings.Split(r.Host, ":")

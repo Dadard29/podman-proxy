@@ -3,89 +3,85 @@ package proxy
 import (
 	"net/http"
 
+	"github.com/Dadard29/podman-proxy/models"
 	"github.com/gorilla/mux"
 )
 
-// Retrieve all existing rules
-func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
-	rules, err := p.db.ListRules()
+func (p *Proxy) domainNamesHandler(w http.ResponseWriter, r *http.Request) {
+	domainNames, err := p.db.ListDomainNames()
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	p.WriteJson(w, &rules)
 	w.WriteHeader(http.StatusOK)
+	p.WriteJson(w, &domainNames)
 }
 
-// Retrieve an existing rule
-func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
-
-	rule, err := p.db.GetRuleFromDomainName(dn)
+func (p *Proxy) domainNameGet(w http.ResponseWriter, r *http.Request, dn string) {
+	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
+	p.WriteJson(w, &domainName)
 }
 
-// Create a new rule
-func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
-	containerName := r.URL.Query().Get("containerName")
-	err := p.db.InsertRule(dn, containerName)
+func (p *Proxy) domainNamePost(w http.ResponseWriter, r *http.Request, dn string) {
+	err := p.db.InsertDomainName(models.DomainName{
+		Name: dn,
+	})
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	rule, err := p.db.GetRuleFromDomainName(dn)
+	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
+	p.WriteJson(w, &domainName)
 }
 
-// Delete a rule
-func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
-	rule, err := p.db.GetRuleFromDomainName(dn)
+func (p *Proxy) domainNameDelete(w http.ResponseWriter, r *http.Request, dn string) {
+	domainName, err := p.db.GetDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	err = p.db.DeleteRuleFromDomainName(dn)
+	err = p.db.DeleteDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	p.WriteJson(w, &rule)
 	w.WriteHeader(http.StatusOK)
+	p.WriteJson(w, &domainName)
 }
 
-// Main rule handler
-func (p *Proxy) ruleHandler(w http.ResponseWriter, r *http.Request) {
+func (p *Proxy) domainNameHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	dn := vars["dn"]
 
 	if r.Method == http.MethodGet {
-		p.ruleGet(w, r, dn)
+		p.domainNameGet(w, r, dn)
 
 	} else if r.Method == http.MethodPost {
-		p.rulePost(w, r, dn)
+		p.domainNamePost(w, r, dn)
 
 	} else if r.Method == http.MethodDelete {
-		p.ruleDelete(w, r, dn)
+		p.domainNameDelete(w, r, dn)
 	}
 }
