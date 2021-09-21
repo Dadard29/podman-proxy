@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/containers/libpod v1.9.3
 	github.com/gorilla/mux v1.8.0
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/text v0.3.3 // indirect
@@ -32,7 +33,6 @@ require (
 	github.com/containers/common v0.8.4 // indirect
 	github.com/containers/conmon v2.0.14+incompatible // indirect
 	github.com/containers/image/v5 v5.4.3 // indirect
-	github.com/containers/libpod v1.9.3 // indirect
 	github.com/containers/libtrust v0.0.0-20190913040956-14b96171aa3b // indirect
 	github.com/containers/ocicrypt v1.0.2 // indirect
 	github.com/containers/psgo v1.4.0 // indirect

@@ -1,33 +1,60 @@
 package podman
 
-import "github.com/Dadard29/podman-proxy/models"
+import (
+	"fmt"
 
-func (r *PodmanRuntime) ListContainers() ([]models.Container, error) {
+	"github.com/Dadard29/podman-proxy/models"
+)
+
+// ListContainers retrieve all containers
+func (r *PodmanRuntime) ListContainers() ([]*models.PodmanContainer, error) {
 	containers, err := r.runtime.GetAllContainers()
 	if err != nil {
 		return nil, err
 	}
-	out := make([]models.Container, 0)
+	out := make([]*models.PodmanContainer, 0)
 	for _, container := range containers {
-		name := container.Name()
-		ips, err := container.IPs()
+
+		podmanContainer, err := models.NewPodmanContainer(container)
 		if err != nil {
 			return nil, err
 		}
-		ip := ips[0].IP.String()
 
-		ports, err := container.PortMappings()
-		if err != nil {
-			return nil, err
-		}
-		exposedPort := int(ports[0].ContainerPort)
-
-		out = append(out, models.Container{
-			Name:        name,
-			IpAddress:   ip,
-			ExposedPort: exposedPort,
-		})
+		out = append(out, podmanContainer)
 	}
 
 	return out, nil
+}
+
+// GetContainerFromName retrieve a specific container using its name
+func (r *PodmanRuntime) GetContainerFromName(containerName string) (*models.PodmanContainer, error) {
+	var out *models.PodmanContainer
+
+	containers, err := r.ListContainers()
+	if err != nil {
+		return out, err
+	}
+
+	for _, container := range containers {
+		if container.Name == containerName {
+			return container, nil
+		}
+	}
+
+	return out, fmt.Errorf("container with name %s not found", containerName)
+}
+
+// GetContainerFromID retrieve a specific container using its ID
+func (r *PodmanRuntime) GetContainerFromID(containerId string) (*models.PodmanContainer, error) {
+	container, err := r.runtime.GetContainer(containerId)
+	if err != nil {
+		return nil, err
+	}
+
+	podmanContainer, err := models.NewPodmanContainer(container)
+	if err != nil {
+		return nil, err
+	}
+
+	return podmanContainer, nil
 }
