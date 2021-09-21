@@ -12,6 +12,7 @@ func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -26,6 +27,7 @@ func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -40,6 +42,7 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -47,6 +50,7 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -60,6 +64,7 @@ func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -67,6 +72,7 @@ func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 

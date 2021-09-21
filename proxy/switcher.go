@@ -17,8 +17,12 @@ func (p *Proxy) WriteJson(w http.ResponseWriter, i interface{}) {
 }
 
 func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
+	if !p.config.debug {
+		return
+	}
+
 	errorObj := struct {
-		Error string
+		Error string `json:"error"`
 	}{
 		Error: err.Error(),
 	}
@@ -35,6 +39,7 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -42,6 +47,7 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
@@ -50,6 +56,7 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p.logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		p.WriteErrorJson(w, err)
 		return
 	}
 
