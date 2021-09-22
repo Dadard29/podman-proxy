@@ -7,27 +7,27 @@ import (
 )
 
 type PodmanPod struct {
-	Id             string             `json:"id"`
-	Name           string             `json:"name"`
-	CreatedAt      time.Time          `json:"created_at"`
-	InfraContainer *PodmanContainer   `json:"infra_container"`
-	Containers     []*PodmanContainer `json:"containers"`
+	Id             string       `json:"id"`
+	Name           string       `json:"name"`
+	CreatedAt      time.Time    `json:"created_at"`
+	InfraContainer *Container   `json:"infra_container"`
+	Containers     []*Container `json:"containers"`
 }
 
-func NewPodmanPod(pod *libpod.Pod, infra *PodmanContainer) (*PodmanPod, error) {
+func NewPodmanPod(pod *libpod.Pod, infra *Container) (*PodmanPod, error) {
 
 	containers, err := pod.AllContainers()
 	if err != nil {
 		return nil, err
 	}
 
-	podmanContainers := make([]*PodmanContainer, 0)
+	Containers := make([]*Container, 0)
 	for _, container := range containers {
-		podmanContainer, err := NewPodmanContainer(container)
+		Container, err := NewContainer(container)
 		if err != nil {
 			return nil, err
 		}
-		podmanContainers = append(podmanContainers, podmanContainer)
+		Containers = append(Containers, Container)
 	}
 
 	return &PodmanPod{
@@ -35,6 +35,6 @@ func NewPodmanPod(pod *libpod.Pod, infra *PodmanContainer) (*PodmanPod, error) {
 		Name:           pod.Name(),
 		CreatedAt:      pod.CreatedTime(),
 		InfraContainer: infra,
-		Containers:     podmanContainers,
+		Containers:     Containers,
 	}, nil
 }

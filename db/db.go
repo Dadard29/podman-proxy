@@ -15,9 +15,14 @@ type Db struct {
 func (db *Db) Init() error {
 	_, err := db.conn.Exec(
 		`CREATE TABLE "containers" (
-			"name"	TEXT NOT NULL UNIQUE,
-			"ip_address"	TEXT,
+			"id"	TEXT NOT NULL UNIQUE,
+			"name"	TEXT NOT NULL,
+			"is_infra"	INTEGER NOT NULL,
+			"is_in_pod"	INTEGER NOT NULL,
+			"pod_id"	TEXT NOT NULL,
+			"ip_address"	TEXT NOT NULL,
 			"exposed_port"	INTEGER NOT NULL,
+			"status"	TEXT NOT NULL,
 			PRIMARY KEY("name")
 		);
 		CREATE TABLE "domain_names" (

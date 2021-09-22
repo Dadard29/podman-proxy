@@ -7,8 +7,8 @@ import (
 	"github.com/containers/libpod/libpod"
 )
 
-func (r *PodmanRuntime) GetInfraContainerFromPod(pod *libpod.Pod) (*models.PodmanContainer, error) {
-	var infra *models.PodmanContainer
+func (r *PodmanRuntime) GetInfraContainerFromPod(pod *libpod.Pod) (*models.Container, error) {
+	var infra *models.Container
 	if pod.HasInfraContainer() {
 		infraId, err := pod.InfraContainerID()
 		if err != nil {

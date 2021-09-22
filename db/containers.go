@@ -23,7 +23,7 @@ func (db *Db) ListContainers() ([]models.Container, error) {
 
 	out := make([]models.Container, 0)
 	for rows.Next() {
-		container, err := models.NewContainer(rows)
+		container, err := models.NewContainerFromRow(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -49,20 +49,23 @@ func (db *Db) GetContainer(containerName string) (models.Container, error) {
 	}
 
 	for row.Next() {
-		return models.NewContainer(row)
+		return models.NewContainerFromRow(row)
 	}
 
 	return out, fmt.Errorf("container with name %s not found", containerName)
 }
 
-func (db *Db) InsertContainer(containerName string, containerIpAddress string) error {
+func (db *Db) InsertContainer(c *models.Container) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 
 	_, err := db.conn.ExecContext(
 		ctx,
-		fmt.Sprintf("insert into %s(name, ip_address) values(?, ?)", containerTableName),
-		containerName, containerIpAddress,
+		fmt.Sprintf(`
+		INSERT INTO
+		%s(id, name, is_infra, is_in_pod, pod_id, ip_address, status, exposed_port)
+		values(?, ?, ?, ?, ?, ?, ?, ?)`, containerTableName),
+		c.Id, c.Name, c.IsInfra, c.IsInPod, c.PodId, c.IpAddress, c.Status, 0,
 	)
 	return err
 }

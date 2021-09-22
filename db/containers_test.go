@@ -25,11 +25,16 @@ func TestContainers(t *testing.T) {
 
 	// create container
 	container := models.Container{
+		Id:          "id",
 		Name:        "container",
+		IsInfra:     false,
+		IsInPod:     false,
+		PodId:       "",
 		IpAddress:   "10.10.10.10",
-		ExposedPort: 8080,
+		ExposedPort: 0,
+		Status:      models.NewContainerStatus("running"),
 	}
-	err = dbService.InsertContainer(container)
+	err = dbService.InsertContainer(&container)
 	if err != nil {
 		t.Error(err)
 	}
@@ -77,9 +82,14 @@ func TestContainersErrors(t *testing.T) {
 	defer CleanTestDb()
 
 	container := models.Container{
+		Id:          "id",
 		Name:        "container",
+		IsInfra:     false,
+		IsInPod:     false,
+		PodId:       "",
 		IpAddress:   "10.10.10.10",
-		ExposedPort: 8080,
+		ExposedPort: 0,
+		Status:      models.NewContainerStatus("running"),
 	}
 
 	// retrieve container - ERR
@@ -99,13 +109,13 @@ func TestContainersErrors(t *testing.T) {
 	}
 
 	// create container
-	err = dbService.InsertContainer(container)
+	err = dbService.InsertContainer(&container)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// (re)create container - ERR
-	err = dbService.InsertContainer(container)
+	err = dbService.InsertContainer(&container)
 	if err == nil {
 		t.Error("expected error on re-creation")
 	} else {

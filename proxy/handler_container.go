@@ -39,7 +39,7 @@ func (p *Proxy) containersPut(w http.ResponseWriter, r *http.Request) {
 
 		// creating in database the newly created containers
 		if !found {
-			err := p.db.InsertContainer(containerPodman.Name, containerPodman.IpAddress)
+			err := p.db.InsertContainer(containerPodman)
 			if err != nil {
 				p.logger.Println(err)
 			}

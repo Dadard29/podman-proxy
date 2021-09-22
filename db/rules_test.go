@@ -21,11 +21,16 @@ func TestRules(t *testing.T) {
 	dbService.InsertDomainName(dn)
 
 	container := models.Container{
+		Id:          "id",
 		Name:        "container",
+		IsInfra:     false,
+		IsInPod:     false,
+		PodId:       "",
 		IpAddress:   "10.10.10.10",
-		ExposedPort: 8080,
+		ExposedPort: 0,
+		Status:      models.NewContainerStatus("running"),
 	}
-	dbService.InsertContainer(container)
+	dbService.InsertContainer(&container)
 
 	// list rules with 0 results
 	ruleList, err := dbService.ListRules()
@@ -88,9 +93,14 @@ func TestRulesErrors(t *testing.T) {
 		Name: "host.com",
 	}
 	container := models.Container{
+		Id:          "id",
 		Name:        "container",
+		IsInfra:     false,
+		IsInPod:     false,
+		PodId:       "",
 		IpAddress:   "10.10.10.10",
-		ExposedPort: 8080,
+		ExposedPort: 0,
+		Status:      models.NewContainerStatus("running"),
 	}
 
 	// get rule - ERR
@@ -129,7 +139,7 @@ func TestRulesErrors(t *testing.T) {
 	}
 
 	// init container
-	dbService.InsertContainer(container)
+	dbService.InsertContainer(&container)
 
 	// create rule
 	err = dbService.InsertRule(dn.Name, container.Name)

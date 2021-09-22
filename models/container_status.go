@@ -1,9 +1,9 @@
 package models
 
-type PodmanContainerStatus int
+type ContainerStatus int
 
 const (
-	Configured PodmanContainerStatus = iota
+	Configured ContainerStatus = iota
 	Created
 	Running
 	Stopped
@@ -15,7 +15,7 @@ const (
 	BadState
 )
 
-func NewPodmanContainerStatus(s string) PodmanContainerStatus {
+func NewContainerStatus(s string) ContainerStatus {
 	switch s {
 	case "configured":
 		return Configured
@@ -37,6 +37,6 @@ func NewPodmanContainerStatus(s string) PodmanContainerStatus {
 	return BadState
 }
 
-func (p PodmanContainerStatus) String() string {
+func (p ContainerStatus) String() string {
 	return []string{"configured", "created", "running", "stopped", "paused", "exited", "removing", "unknown", "bad state"}[p]
 }
