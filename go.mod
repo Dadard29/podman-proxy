@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.8
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
 require (
@@ -117,7 +118,6 @@ require (
 	google.golang.org/grpc v1.24.0 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	k8s.io/api v0.17.4 // indirect

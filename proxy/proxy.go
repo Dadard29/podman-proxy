@@ -96,6 +96,7 @@ func NewProxy() (*Proxy, error) {
 	}
 
 	router := mux.NewRouter()
+	router.HandleFunc("/auth", proxy.authHandler).Methods(http.MethodPost, http.MethodGet)
 	router.HandleFunc("/rule", proxy.rulesHandler).Methods(http.MethodGet)
 	router.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet)

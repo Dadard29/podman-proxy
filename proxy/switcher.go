@@ -13,6 +13,19 @@ import (
 
 func (p *Proxy) WriteJson(w http.ResponseWriter, i interface{}) {
 	res, _ := json.MarshalIndent(i, "", "    ")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func (p *Proxy) WriteMessageJson(w http.ResponseWriter, message string) {
+	s := struct {
+		Msg string `json:"msg"`
+	}{
+		Msg: message,
+	}
+	res, _ := json.MarshalIndent(&s, "", "    ")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }
@@ -28,6 +41,7 @@ func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
 		Error: err.Error(),
 	}
 	res, _ := json.MarshalIndent(&errorObj, "", "     ")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write(res)
 }

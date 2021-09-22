@@ -12,6 +12,7 @@ type config struct {
 	dbPath       string
 	debug        bool
 	upgraderPort int
+	jwtKey       string
 }
 
 const envProxyHost = "PROXY_HOST"
@@ -19,6 +20,7 @@ const envProxyPort = "PROXY_PORT"
 const envDbPath = "DB_PATH"
 const envDebug = "DEBUG"
 const envUpgraderPort = "UPGRADER_PORT"
+const envJwtKey = "JWT_KEY"
 
 func newConfigFromEnv() (config, error) {
 	proxyHost := os.Getenv(envProxyHost)
@@ -26,6 +28,7 @@ func newConfigFromEnv() (config, error) {
 	dbPath := os.Getenv(envDbPath)
 	debug := os.Getenv(envDebug)
 	upgraderPortStr := os.Getenv(envUpgraderPort)
+	jwtKey := os.Getenv(envJwtKey)
 
 	vars := map[string]string{
 		envProxyHost:    proxyHost,
@@ -33,6 +36,7 @@ func newConfigFromEnv() (config, error) {
 		envDbPath:       dbPath,
 		envDebug:        debug,
 		envUpgraderPort: upgraderPortStr,
+		envJwtKey:       jwtKey,
 	}
 
 	for env, value := range vars {
@@ -57,6 +61,7 @@ func newConfigFromEnv() (config, error) {
 		proxyPort:    proxyPort,
 		debug:        debug == "1",
 		upgraderPort: upgraderPort,
+		jwtKey:       jwtKey,
 	}
 
 	return proxyConfig, nil

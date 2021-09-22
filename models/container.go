@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/containers/libpod/libpod"
@@ -83,7 +82,7 @@ func (c Container) String() string {
 	return fmt.Sprintf("%s: %s:%d", c.Name, c.IpAddress, c.ExposedPort)
 }
 
-func NewContainerFromRow(rowCursor *sql.Rows) (Container, error) {
+func NewContainerFromRow(scan func(dest ...interface{}) error) (Container, error) {
 	var id string
 	var name string
 	var isInfra int
@@ -92,7 +91,7 @@ func NewContainerFromRow(rowCursor *sql.Rows) (Container, error) {
 	var ipAddress string
 	var exposedPort int
 	var status string
-	err := rowCursor.Scan(&id, &name, &isInfra, &isInPod, &podId,
+	err := scan(&id, &name, &isInfra, &isInPod, &podId,
 		&ipAddress, &exposedPort, &status)
 
 	if err != nil {

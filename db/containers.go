@@ -23,7 +23,7 @@ func (db *Db) ListContainers() ([]models.Container, error) {
 
 	out := make([]models.Container, 0)
 	for rows.Next() {
-		container, err := models.NewContainerFromRow(rows)
+		container, err := models.NewContainerFromRow(rows.Scan)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func (db *Db) GetContainer(containerName string) (models.Container, error) {
 	}
 
 	for row.Next() {
-		return models.NewContainerFromRow(row)
+		return models.NewContainerFromRow(row.Scan)
 	}
 
 	return out, fmt.Errorf("container with name %s not found", containerName)
