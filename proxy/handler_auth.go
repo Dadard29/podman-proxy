@@ -32,7 +32,6 @@ func (p *Proxy) authPost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := p.db.GetUser(username)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusNotFound, err)
 		return
 	}

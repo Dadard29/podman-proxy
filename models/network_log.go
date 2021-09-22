@@ -3,6 +3,7 @@ package models
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -49,5 +50,42 @@ func NewNetworkLogFromRequest(req *http.Request,
 	}
 
 	return netLog, nil
+}
+
+func NewNetworkLog(scan func(dest ...interface{}) error) (NetworkLog, error) {
+	var timestampStr string
+	var requestHost string
+	var requestMethod string
+	var requestPath string
+	var requestBody []byte
+	var requestArgs string
+	var responseStatusCode int
+	var responseDuration int
+	var responseBody []byte
+
+	err := scan(&timestampStr, &requestHost, &requestMethod, &requestPath, &requestBody,
+		&requestArgs, &responseStatusCode, &responseDuration, &responseBody)
+
+	if err != nil {
+		return NetworkLog{}, err
+	}
+
+	timestampInt, err := strconv.Atoi(timestampStr)
+	if err != nil {
+		return NetworkLog{}, err
+	}
+	timestamp := time.Unix(int64(timestampInt), 0)
+
+	return NetworkLog{
+		Timestamp:          timestamp,
+		RequestHost:        requestHost,
+		RequestMethod:      requestMethod,
+		RequestPath:        requestPath,
+		RequestBody:        requestBody,
+		RequestArgs:        requestArgs,
+		ResponseStatusCode: responseStatusCode,
+		ResponseDuration:   responseDuration,
+		ResponseBody:       requestBody,
+	}, nil
 
 }

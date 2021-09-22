@@ -102,7 +102,8 @@ func NewProxy() (*Proxy, error) {
 	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet)
 	router.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet, http.MethodPut)
-	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet)
+	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc("/container-sync", proxy.containerSyncHandler).Methods(http.MethodGet, http.MethodPost)
 
 	router.Use(proxy.authMiddleware)
 

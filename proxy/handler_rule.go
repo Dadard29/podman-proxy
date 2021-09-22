@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,7 +11,6 @@ import (
 func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
 	rules, err := p.db.ListRules()
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -23,7 +23,6 @@ func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
 
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusNotFound, err)
 		return
 	}
@@ -34,16 +33,28 @@ func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
 // Create a new rule
 func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 	containerName := r.URL.Query().Get("containerName")
-	err := p.db.InsertRule(dn, containerName)
+
+	// check if container has a valid exposedPort
+	container, err := p.db.GetContainer(containerName)
 	if err != nil {
-		p.logger.Println(err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if container.ExposedPort == 0 {
+		p.WriteErrorJson(w, http.StatusInternalServerError,
+			fmt.Errorf("container %s has no valid exposedPort set", container.Name))
+		return
+	}
+
+	err = p.db.InsertRule(dn, containerName)
+	if err != nil {
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -55,14 +66,12 @@ func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
 func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	err = p.db.DeleteRuleFromDomainName(dn)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}

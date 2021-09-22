@@ -27,7 +27,7 @@ func NewAccessToken(user User, jwtKey string) (AccessToken, error) {
 		return AccessToken{}, err
 	}
 
-	duration := 30 * time.Second
+	duration := 24 * time.Hour * 7
 	expiry := time.Now().Add(duration)
 
 	claims := jwt.Claims{

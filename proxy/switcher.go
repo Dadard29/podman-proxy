@@ -31,6 +31,7 @@ func (p *Proxy) WriteMessageJson(w http.ResponseWriter, message string) {
 }
 
 func (p *Proxy) WriteErrorJson(w http.ResponseWriter, code int, err error) {
+	p.logger.Println(err)
 	if !p.config.debug {
 		return
 	}
@@ -60,7 +61,6 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 
 	container, err := p.db.GetContainer(rule.ContainerName)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -68,7 +68,6 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	containerUrlStr := fmt.Sprintf("http://%s:%d", container.IpAddress, container.ExposedPort)
 	containerUrl, err := url.Parse(containerUrlStr)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}

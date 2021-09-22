@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dadard29/podman-proxy/models"
 )
@@ -70,7 +71,31 @@ func (db *Db) InsertContainer(c *models.Container) error {
 	return err
 }
 
-func (db *Db) UpdateContainer(containerName string, ipAddress string, status models.ContainerStatus) error {
+func (db *Db) UpdateContainerExposedPort(containerName string, exposedPort int) error {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	result, err := db.conn.ExecContext(
+		ctx,
+		fmt.Sprintf("update %s set exposed_port = ? where name = ?", containerTableName),
+		exposedPort, containerName,
+	)
+	if err != nil {
+		return err
+	}
+
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return fmt.Errorf("update failed: container with name %s not found", containerName)
+	}
+	return nil
+}
+
+func (db *Db) UpdateContainerIpStatus(containerName string, ipAddress string, status models.ContainerStatus) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 
@@ -92,6 +117,30 @@ func (db *Db) UpdateContainer(containerName string, ipAddress string, status mod
 		return fmt.Errorf("update failed: container with name %s not found", containerName)
 	}
 	return nil
+}
+
+func (db *Db) GetContainerLastUpdatedAt() (*time.Time, error) {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	row := db.conn.QueryRowContext(
+		ctx,
+		fmt.Sprintf(`
+			select * from %s
+			where request_path = "/container" 
+				and request_method = "PUT"
+				and response_status_code = "200"
+			order by timestamp DESC
+			limit 1
+		`, networkLogTableName),
+	)
+
+	netlog, err := models.NewNetworkLog(row.Scan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &netlog.Timestamp, nil
 }
 
 func (db *Db) DeleteContainer(containerName string) error {
