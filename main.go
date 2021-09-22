@@ -12,27 +12,27 @@ import (
 func main() {
 	p, err := proxy.NewProxy()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(Fatal(err))
 	}
 
-	log.Println("* Starting upgrader goroutine")
+	log.Println(Info("* Starting upgrader goroutine"))
 	go func() {
 		err := p.Upgrader.Serve()
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			log.Fatal(Fatal(err))
 		}
 	}()
 
-	log.Println("* Starting proxy goroutine")
+	log.Println(Info("* Starting proxy goroutine"))
 	go func() {
 		err := p.Serve(false)
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			log.Fatal(Fatal(err))
 		}
 	}()
 
 	defer func() {
-		log.Println("* Shutting down proxy and upgrader..")
+		log.Println(Info("* Shutting down proxy and upgrader.."))
 		p.Upgrader.Shutdown()
 		p.Shutdown()
 	}()
