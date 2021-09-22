@@ -72,3 +72,7 @@ func NewDb(dbPath string) (*Db, error) {
 		conn:   conn,
 	}, nil
 }
+
+func (db *Db) Close() error {
+	return db.conn.Close()
+}

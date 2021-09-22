@@ -158,4 +158,7 @@ func (p *Proxy) Shutdown() {
 
 	p.logger.Println("shutting down server...")
 	p.server.Shutdown(ctx)
+
+	p.podman.Stop()
+	p.db.Close()
 }

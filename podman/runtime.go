@@ -8,7 +8,7 @@ import (
 
 type PodmanRuntime struct {
 	runtime *libpod.Runtime
-	stop    context.CancelFunc
+	Stop    context.CancelFunc
 }
 
 func NewPodmanRuntime() (*PodmanRuntime, error) {
@@ -21,6 +21,6 @@ func NewPodmanRuntime() (*PodmanRuntime, error) {
 
 	return &PodmanRuntime{
 		runtime: r,
-		stop:    stop,
+		Stop:    stop,
 	}, nil
 }

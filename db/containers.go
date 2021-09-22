@@ -127,8 +127,8 @@ func (db *Db) GetContainerLastUpdatedAt() (*time.Time, error) {
 		ctx,
 		fmt.Sprintf(`
 			select * from %s
-			where request_path = "/container" 
-				and request_method = "PUT"
+			where request_path = "/container-sync" 
+				and request_method = "POST"
 				and response_status_code = "200"
 			order by timestamp DESC
 			limit 1
