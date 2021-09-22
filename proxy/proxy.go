@@ -104,6 +104,8 @@ func NewProxy() (*Proxy, error) {
 	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet, http.MethodPut)
 	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet)
 
+	router.Use(proxy.authMiddleware)
+
 	proxy.router = router
 
 	if proxy.config.debug {

@@ -11,14 +11,14 @@ func (p *Proxy) containersPut(w http.ResponseWriter, r *http.Request) {
 	containersDb, err := p.db.ListContainers()
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	containersPodman, err := p.podman.ListContainers()
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (p *Proxy) containersPut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err != nil {
 			p.logger.Println(err)
-			p.WriteErrorJson(w, err)
+			p.WriteErrorJson(w, http.StatusInternalServerError, err)
 			return
 		}
 	}
@@ -83,7 +83,7 @@ func (p *Proxy) containersGet(w http.ResponseWriter, r *http.Request) {
 	containersPodman, err := p.db.ListContainers()
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (p *Proxy) containerGet(w http.ResponseWriter, r *http.Request, containerNa
 	container, err := p.db.GetContainer(containerName)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusNotFound, err)
 		return
 	}
 

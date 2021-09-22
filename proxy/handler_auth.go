@@ -13,7 +13,7 @@ func (p *Proxy) authGet(w http.ResponseWriter, r *http.Request) {
 	token := models.NewAccessTokenFromRequest(r)
 	if err := token.Verify(p.config.jwtKey); err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -26,14 +26,14 @@ func (p *Proxy) authPost(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		s := "invalid authentification format"
 		p.logger.Println(s)
-		p.WriteErrorJson(w, fmt.Errorf(s))
+		p.WriteErrorJson(w, http.StatusUnauthorized, fmt.Errorf(s))
 		return
 	}
 
 	user, err := p.db.GetUser(username)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusNotFound, err)
 		return
 	}
 
@@ -42,14 +42,14 @@ func (p *Proxy) authPost(w http.ResponseWriter, r *http.Request) {
 	err = bcrypt.CompareHashAndPassword(hashedPasswordBytes, passwordBytes)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	token, err := models.NewAccessToken(user, p.config.jwtKey)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 

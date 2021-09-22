@@ -30,7 +30,7 @@ func (p *Proxy) WriteMessageJson(w http.ResponseWriter, message string) {
 	w.Write(res)
 }
 
-func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
+func (p *Proxy) WriteErrorJson(w http.ResponseWriter, code int, err error) {
 	if !p.config.debug {
 		return
 	}
@@ -42,7 +42,7 @@ func (p *Proxy) WriteErrorJson(w http.ResponseWriter, err error) {
 	}
 	res, _ := json.MarshalIndent(&errorObj, "", "     ")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusInternalServerError)
+	w.WriteHeader(code)
 	w.Write(res)
 }
 
@@ -54,14 +54,14 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	container, err := p.db.GetContainer(rule.ContainerName)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	containerUrl, err := url.Parse(containerUrlStr)
 	if err != nil {
 		p.logger.Println(err)
-		p.WriteErrorJson(w, err)
+		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
