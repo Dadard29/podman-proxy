@@ -28,7 +28,7 @@ func (p *Proxy) containersPut(w http.ResponseWriter, r *http.Request) {
 		// updating the database with the new IPs of the containers
 		for _, containerDb := range containersDb {
 			if containerPodman.Name == containerDb.Name {
-				err := p.db.UpdateContainerIpAddress(containerPodman.IpAddress, containerPodman.IpAddress)
+				err := p.db.UpdateContainer(containerPodman.Name, containerPodman.IpAddress, containerPodman.Status)
 				if err != nil {
 					p.logger.Println(err)
 				}
@@ -90,6 +90,7 @@ func (p *Proxy) containersGet(w http.ResponseWriter, r *http.Request) {
 	p.WriteJson(w, &containersPodman)
 }
 
+// Main entrypoint for containers list management
 func (p *Proxy) containersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		p.containersGet(w, r)
@@ -112,6 +113,7 @@ func (p *Proxy) containerGet(w http.ResponseWriter, r *http.Request, containerNa
 	p.WriteJson(w, &container)
 }
 
+// Main entrypoint for single container management
 func (p *Proxy) containerHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerName := vars["container"]

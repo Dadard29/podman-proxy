@@ -32,7 +32,8 @@ func main() {
 	}()
 
 	defer func() {
-		log.Println("* Shutting down proxy..")
+		log.Println("* Shutting down proxy and upgrader..")
+		p.Upgrader.Shutdown()
 		p.Shutdown()
 	}()
 

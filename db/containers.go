@@ -65,21 +65,33 @@ func (db *Db) InsertContainer(c *models.Container) error {
 		INSERT INTO
 		%s(id, name, is_infra, is_in_pod, pod_id, ip_address, status, exposed_port)
 		values(?, ?, ?, ?, ?, ?, ?, ?)`, containerTableName),
-		c.Id, c.Name, c.IsInfra, c.IsInPod, c.PodId, c.IpAddress, c.Status, 0,
+		c.Id, c.Name, c.IsInfra, c.IsInPod, c.PodId, c.IpAddress, c.Status.String(), 0,
 	)
 	return err
 }
 
-func (db *Db) UpdateContainerIpAddress(containerName string, ipAddress string) error {
+func (db *Db) UpdateContainer(containerName string, ipAddress string, status models.ContainerStatus) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 
-	_, err := db.conn.ExecContext(
+	result, err := db.conn.ExecContext(
 		ctx,
-		fmt.Sprintf("update %s set ip_address = ? where name = ?", containerTableName),
-		ipAddress, containerName,
+		fmt.Sprintf("update %s set ip_address = ?, status = ? where name = ?", containerTableName),
+		ipAddress, status.String(), containerName,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return fmt.Errorf("update failed: container with name %s not found", containerName)
+	}
+	return nil
 }
 
 func (db *Db) DeleteContainer(containerName string) error {

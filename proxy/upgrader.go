@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -66,4 +67,12 @@ func (up *Upgrader) Serve() error {
 
 	up.logger.Printf("Starting proxy upgrader on %s\n", up.server.Addr)
 	return up.server.ListenAndServe()
+}
+
+func (up *Upgrader) Shutdown() {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	up.logger.Println("shutting down upgrader...")
+	up.server.Shutdown(ctx)
 }

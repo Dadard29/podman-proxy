@@ -151,5 +151,7 @@ func (p *Proxy) Serve(withTLS bool) error {
 func (p *Proxy) Shutdown() {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
+
+	p.logger.Println("shutting down server...")
 	p.server.Shutdown(ctx)
 }
