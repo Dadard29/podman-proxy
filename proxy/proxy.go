@@ -22,6 +22,9 @@ type Proxy struct {
 	server *http.Server
 	router *mux.Router
 	podman *podman.PodmanRuntime
+
+	Ctx    *context.Context
+	Cancel *context.CancelFunc
 }
 
 func (p *Proxy) getAddrFromProxyPort() string {
@@ -93,13 +96,16 @@ func NewProxy() (*Proxy, error) {
 		router:   nil,
 		Upgrader: upgrader,
 		podman:   runtime,
+
+		Ctx:    nil,
+		Cancel: nil,
 	}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/auth", proxy.authHandler).Methods(http.MethodPost, http.MethodGet)
 	router.HandleFunc("/rule", proxy.rulesHandler).Methods(http.MethodGet)
 	router.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
-	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet)
+	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet, http.MethodPut)
 	router.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet, http.MethodPut)
 	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost)
@@ -123,6 +129,12 @@ func (p *Proxy) Serve(withTLS bool) error {
 	router.PathPrefix("/").HandlerFunc(p.switcher)
 	router.Use(p.dbLoggingMiddleware)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	p.Cancel = &cancel
+	p.Ctx = &ctx
+
+	p.db.UpdateDomainNameLive()
+
 	p.logger.Printf("Starting proxy server on %s...\n", p.Host())
 
 	if withTLS {
@@ -141,24 +153,43 @@ func (p *Proxy) Serve(withTLS bool) error {
 		p.server = p.newHttpsServer(domainNamesListStr...)
 		p.server.Handler = router
 		err = p.server.ListenAndServeTLS("", "")
-		return err
+		if err != nil && err != http.ErrServerClosed {
+			return err
+		}
 
 	} else {
 		// configure the HTTP server
 		p.server = p.newHttpServer()
 		p.server.Handler = router
 		err := p.server.ListenAndServe()
-		return err
+		if err != nil && err != http.ErrServerClosed {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (p *Proxy) Shutdown() {
-	ctx, stop := context.WithCancel(context.Background())
-	defer stop()
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer func() {
+		p.Ctx = nil
+		p.Cancel = nil
+
+		cancel()
+	}()
 
 	p.logger.Println("shutting down server...")
-	p.server.Shutdown(ctx)
+	err := p.server.Shutdown(ctx)
+	if err != nil {
+		p.logger.Println("WARNING:", err)
+	}
+}
 
+func (p *Proxy) Close() {
+	p.logger.Println("closing connections...")
 	p.podman.Stop()
 	p.db.Close()
 }

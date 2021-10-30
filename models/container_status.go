@@ -1,35 +1,27 @@
 package models
 
-type ContainerStatus int
+type ContainerStatus string
 
 const (
-	Configured ContainerStatus = iota
-	Created
-	Running
-	Stopped
-	Paused
-	Exited
-	Removing
-
-	Unknown
-	BadState
+	Configured ContainerStatus = "configured"
+	Created    ContainerStatus = "created"
+	Running    ContainerStatus = "running"
+	Stopped    ContainerStatus = "stopped"
+	Paused     ContainerStatus = "paused"
+	Exited     ContainerStatus = "exited"
+	Removing   ContainerStatus = "removing"
+	Unknown    ContainerStatus = "unknown"
+	BadState   ContainerStatus = "bad_state"
 )
 
-var toString = map[ContainerStatus]string{
-	Configured: "configured",
-	Created:    "created",
-	Running:    "running",
-	Stopped:    "stopped",
-	Paused:     "paused",
-	Exited:     "exited",
-	Removing:   "removing",
-	Unknown:    "unknown",
+var statusList = []ContainerStatus{
+	Configured, Created, Running, Stopped, Paused, Exited, Removing, Unknown, BadState,
 }
 
 func NewContainerStatus(s string) ContainerStatus {
-	for k, v := range toString {
-		if v == s {
-			return k
+	for _, v := range statusList {
+		if v.String() == s {
+			return v
 		}
 	}
 
@@ -37,5 +29,5 @@ func NewContainerStatus(s string) ContainerStatus {
 }
 
 func (p ContainerStatus) String() string {
-	return toString[p]
+	return string(p)
 }

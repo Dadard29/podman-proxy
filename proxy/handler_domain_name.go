@@ -7,7 +7,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (p *Proxy) domainNamesHandler(w http.ResponseWriter, r *http.Request) {
+func (p *Proxy) domainNameListUpdate(w http.ResponseWriter, r *http.Request) {
+
+	p.WriteMessageJson(w, "restarting proxy...")
+
+	(*p.Cancel)()
+}
+
+func (p *Proxy) domainNameListGet(w http.ResponseWriter, r *http.Request) {
 	domainNames, err := p.db.ListDomainNames()
 	if err != nil {
 		p.logger.Println(err)
@@ -16,6 +23,16 @@ func (p *Proxy) domainNamesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.WriteJson(w, &domainNames)
+}
+
+func (p *Proxy) domainNamesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		p.domainNameListGet(w, r)
+
+	} else if r.Method == http.MethodPut {
+		p.domainNameListUpdate(w, r)
+
+	}
 }
 
 func (p *Proxy) domainNameGet(w http.ResponseWriter, r *http.Request, dn string) {
@@ -71,6 +88,8 @@ func (p *Proxy) domainNameHandler(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == http.MethodPost {
 		p.domainNamePost(w, r, dn)
+
+	} else if r.Method == http.MethodPut {
 
 	} else if r.Method == http.MethodDelete {
 		p.domainNameDelete(w, r, dn)

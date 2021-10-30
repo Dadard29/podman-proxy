@@ -27,6 +27,7 @@ func (db *Db) Init() error {
 		);
 		CREATE TABLE "domain_names" (
 			"name"	TEXT NOT NULL UNIQUE,
+			"live"	INTEGER NOT NULL DEFAULT 0,
 			PRIMARY KEY("name")
 		);
 		CREATE TABLE "rules" (

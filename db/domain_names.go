@@ -9,6 +9,18 @@ import (
 
 const domainNameTableName = "domain_names"
 
+func (db *Db) UpdateDomainNameLive() error {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
+	_, err := db.conn.ExecContext(
+		ctx,
+		fmt.Sprintf("update %s set live = 1", domainNameTableName),
+	)
+
+	return err
+}
+
 func (db *Db) InsertDomainName(domainName models.DomainName) error {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()

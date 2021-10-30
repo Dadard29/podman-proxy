@@ -90,7 +90,6 @@ func (p *Proxy) containerSyncPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.WriteJson(w, &containersDb)
-
 }
 
 func (p *Proxy) containerSyncHandler(w http.ResponseWriter, r *http.Request) {
