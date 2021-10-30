@@ -10,11 +10,11 @@ import (
 	"github.com/Dadard29/podman-proxy/proxy"
 )
 
-const InfraLogFreq = 10 * time.Second
+const InfraLogFreq = 5 * time.Minute
 
 func serve(p *proxy.Proxy) {
 
-	err := p.Serve(false)
+	err := p.Serve(true)
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatal(Fatal(err))
 	}

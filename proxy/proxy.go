@@ -71,6 +71,7 @@ func (p *Proxy) NewInfraLog() error {
 
 func (p *Proxy) newHttpsServer(domainNames ...string) *http.Server {
 	// tls
+	domainNames = append(domainNames, p.config.proxyHost)
 	manager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache("/srv/https/certificates"),
