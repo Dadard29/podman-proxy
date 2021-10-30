@@ -5,16 +5,16 @@ import "fmt"
 // https://gist.github.com/ik5/d8ecde700972d4378d87
 
 var (
-	Info = Green
-	// Warn  = Yellow
+	Info  = Green
+	Warn  = Yellow
 	Fatal = Red
 )
 
 var (
 	// Black   = Color("\033[1;30m%s\033[0m")
-	Red   = Color("\033[1;31m%s\033[0m")
-	Green = Color("\033[1;32m%s\033[0m")
-	// Yellow = Color("\033[1;33m%s\033[0m")
+	Red    = Color("\033[1;31m%s\033[0m")
+	Green  = Color("\033[1;32m%s\033[0m")
+	Yellow = Color("\033[1;33m%s\033[0m")
 	// Purple  = Color("\033[1;34m%s\033[0m")
 	// Magenta = Color("\033[1;35m%s\033[0m")
 	// Teal    = Color("\033[1;36m%s\033[0m")

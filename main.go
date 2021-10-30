@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/Dadard29/podman-proxy/proxy"
 )
+
+const InfraLogFreq = 10 * time.Second
 
 func serve(p *proxy.Proxy) {
 
@@ -17,19 +20,33 @@ func serve(p *proxy.Proxy) {
 	}
 }
 
+func upgraderServe(p *proxy.Proxy) {
+	err := p.Upgrader.Serve()
+	if err != nil && err != http.ErrServerClosed {
+		log.Fatal(Fatal(err))
+	}
+}
+
+func infraLogger(p *proxy.Proxy) {
+	for {
+		if err := p.NewInfraLog(); err != nil {
+			log.Println(Warn("failed inserting to infra log", err))
+		}
+		time.Sleep(InfraLogFreq)
+	}
+}
+
 func main() {
 	p, err := proxy.NewProxy()
 	if err != nil {
 		log.Fatal(Fatal(err))
 	}
 
-	// log.Println(Info("* Starting upgrader goroutine"))
-	// go func() {
-	// 	err := p.Upgrader.Serve()
-	// 	if err != nil && err != http.ErrServerClosed {
-	// 		log.Fatal(Fatal(err))
-	// 	}
-	// }()
+	log.Println(Info("* Starting infra logger goroutine"))
+	go infraLogger(p)
+
+	log.Println(Info("* Starting upgrader goroutine"))
+	go upgraderServe(p)
 
 	log.Println(Info("* Starting proxy goroutine"))
 	go serve(p)

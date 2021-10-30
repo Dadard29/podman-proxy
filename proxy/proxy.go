@@ -6,8 +6,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Dadard29/podman-proxy/db"
+	"github.com/Dadard29/podman-proxy/models"
 	"github.com/Dadard29/podman-proxy/podman"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
@@ -22,6 +24,7 @@ type Proxy struct {
 	server *http.Server
 	router *mux.Router
 	podman *podman.PodmanRuntime
+	infra  Infra
 
 	Ctx    *context.Context
 	Cancel *context.CancelFunc
@@ -37,6 +40,33 @@ func (p *Proxy) Host() string {
 	} else {
 		return fmt.Sprintf("%s:%d", p.config.proxyHost, p.config.proxyPort)
 	}
+}
+
+func (p *Proxy) NewInfraLog() error {
+	cpu, err := p.infra.GetCpuUsage(3 * time.Second)
+	if err != nil {
+		p.logger.Println("WARNING: failed to get CPU")
+		return err
+	}
+	mem, err := p.infra.GetMemUsage()
+	if err != nil {
+		p.logger.Println("WARNING: failed to get memory")
+		return err
+	}
+	disk, err := p.infra.GetDiskUsage()
+	if err != nil {
+		p.logger.Println("WARNING: failed to get disk")
+		return err
+	}
+
+	infraLog := models.InfraLog{
+		Timestamp: time.Now(),
+		Cpu:       cpu,
+		Memory:    mem,
+		Disk:      disk,
+	}
+
+	return p.db.InsertInfraLog(infraLog)
 }
 
 func (p *Proxy) newHttpsServer(domainNames ...string) *http.Server {
@@ -80,8 +110,8 @@ func NewProxy() (*Proxy, error) {
 	}
 
 	logger := log.New(log.Default().Writer(), "proxy ", log.Default().Flags())
-
 	upgrader := NewUpgrader(config.upgraderPort)
+	infra := NewInfra()
 
 	runtime, err := podman.NewPodmanRuntime()
 	if err != nil {
@@ -96,6 +126,7 @@ func NewProxy() (*Proxy, error) {
 		router:   nil,
 		Upgrader: upgrader,
 		podman:   runtime,
+		infra:    infra,
 
 		Ctx:    nil,
 		Cancel: nil,
