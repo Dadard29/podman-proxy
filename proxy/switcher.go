@@ -65,7 +65,23 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	containerUrlStr := fmt.Sprintf("http://%s:%d", container.IpAddress, container.ExposedPort)
+	var ipAddress string
+	var exposedPort = container.ExposedPort
+
+	if container.IsInPod {
+		podId := container.PodId
+		podInfraName := fmt.Sprintf("%s-infra", podId[:12])
+		pod, err := p.db.GetContainer(podInfraName)
+		if err != nil {
+			p.WriteErrorJson(w, http.StatusInternalServerError, err)
+			return
+		}
+		ipAddress = pod.IpAddress
+	} else {
+		ipAddress = container.IpAddress
+	}
+
+	containerUrlStr := fmt.Sprintf("http://%s:%d", ipAddress, exposedPort)
 	containerUrl, err := url.Parse(containerUrlStr)
 	if err != nil {
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
