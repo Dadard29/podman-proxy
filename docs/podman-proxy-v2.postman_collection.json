@@ -1,0 +1,583 @@
+{
+	"info": {
+		"_postman_id": "e9ad5a02-a467-47cd-bdbf-ac380b97c692",
+		"name": "podman-proxy-v2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "460c057d-24c6-4180-bd93-e58f095ef7d8",
+						"exec": [
+							"var j = pm.response.json();",
+							"pm.environment.set(\"jwt\", j.token);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/auth",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"auth"
+					]
+				},
+				"description": "Creates a new JWT"
+			},
+			"response": []
+		},
+		{
+			"name": "Authentication verify",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/auth",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"auth"
+					]
+				},
+				"description": "Verify the validity of a JWT"
+			},
+			"response": []
+		},
+		{
+			"name": "Container list",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/container",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"container"
+					]
+				},
+				"description": "List all containers stored in database"
+			},
+			"response": []
+		},
+		{
+			"name": "Container get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/container/{{container}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"container",
+						"{{container}}"
+					]
+				},
+				"description": "Retrieve a specific container"
+			},
+			"response": []
+		},
+		{
+			"name": "Container post",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/container/{{container}}?exposedPort=8090",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"container",
+						"{{container}}"
+					],
+					"query": [
+						{
+							"key": "exposedPort",
+							"value": "8090"
+						}
+					]
+				},
+				"description": "Set the exposedPort of the container into the database"
+			},
+			"response": []
+		},
+		{
+			"name": "Container sync post",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/container-sync",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"container-sync"
+					]
+				},
+				"description": "Update the containers of the database from podman runtime"
+			},
+			"response": []
+		},
+		{
+			"name": "Container sync get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/container-sync",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"container-sync"
+					]
+				},
+				"description": "Get the last time the containers were updated"
+			},
+			"response": []
+		},
+		{
+			"name": "Proxy restart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/domain-name",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"domain-name"
+					]
+				},
+				"description": "Restart the proxy to apply the domain name changes, for TLS setup"
+			},
+			"response": []
+		},
+		{
+			"name": "Domain name list",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/domain-name",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"domain-name"
+					]
+				},
+				"description": "Get the full list off stored domain names in database"
+			},
+			"response": []
+		},
+		{
+			"name": "Domain name get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/domain-name/{{domain_name}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"domain-name",
+						"{{domain_name}}"
+					]
+				},
+				"description": "Retrieve a single domain name from database"
+			},
+			"response": []
+		},
+		{
+			"name": "Domain name delete",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/domain-name/{{domain_name}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"domain-name",
+						"{{domain_name}}"
+					]
+				},
+				"description": "Retrieve a single domain name from database"
+			},
+			"response": []
+		},
+		{
+			"name": "Domain name post",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/domain-name/{{domain_name}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"domain-name",
+						"{{domain_name}}"
+					]
+				},
+				"description": "Retrieve a single domain name from database"
+			},
+			"response": []
+		},
+		{
+			"name": "Container request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{domain_name}}:{{proxy_port}}/infos",
+					"host": [
+						"{{domain_name}}"
+					],
+					"port": "{{proxy_port}}",
+					"path": [
+						"infos"
+					]
+				},
+				"description": "Issue a request to a container configured into the proxy database"
+			},
+			"response": []
+		},
+		{
+			"name": "Rule list",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/rule",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"rule"
+					]
+				},
+				"description": "Get the full list of rules from database"
+			},
+			"response": []
+		},
+		{
+			"name": "Rule create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/rule/{{domain_name}}?containerName={{container}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"rule",
+						"{{domain_name}}"
+					],
+					"query": [
+						{
+							"key": "containerName",
+							"value": "{{container}}"
+						}
+					]
+				},
+				"description": "Create a new rule"
+			},
+			"response": []
+		},
+		{
+			"name": "Rule get",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/rule/{{domain_name}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"rule",
+						"{{domain_name}}"
+					]
+				},
+				"description": "Get a specific rule from database"
+			},
+			"response": []
+		},
+		{
+			"name": "Rule detele",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{proxy_host}}/rule/{{domain_name}}",
+					"host": [
+						"{{proxy_host}}"
+					],
+					"path": [
+						"rule",
+						"{{domain_name}}"
+					]
+				},
+				"description": "Delete a rule from database"
+			},
+			"response": []
+		}
+	]
+}
