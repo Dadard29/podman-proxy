@@ -6,6 +6,7 @@ require (
 	github.com/containers/libpod v1.9.3
 	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.8
+	github.com/shirou/gopsutil/v3 v3.21.9
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
@@ -20,7 +21,6 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver v3.1.0+incompatible // indirect
-	github.com/c9s/goprocinfo v0.0.0-20210130143923-c95fcf8c64a8 // indirect
 	github.com/checkpoint-restore/go-criu v0.0.0-20190109184317-bdb7599cd87b // indirect
 	github.com/containerd/cgroups v0.0.0-20190919134610-bf292b21730f // indirect
 	github.com/containerd/containerd v1.3.0 // indirect
@@ -94,8 +94,6 @@ require (
 	github.com/rootless-containers/rootlesskit v0.9.3 // indirect
 	github.com/seccomp/containers-golang v0.0.0-20190312124753-8ca8945ccf5f // indirect
 	github.com/seccomp/libseccomp-golang v0.9.1 // indirect
-	github.com/shirou/gopsutil v3.21.9+incompatible // indirect
-	github.com/shirou/gopsutil/v3 v3.21.9 // indirect
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/spf13/cobra v0.0.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

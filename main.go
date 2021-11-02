@@ -14,7 +14,7 @@ const InfraLogFreq = 5 * time.Minute
 
 func serve(p *proxy.Proxy) {
 
-	err := p.Serve(true)
+	err := p.Serve(false)
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatal(Fatal(err))
 	}

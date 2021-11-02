@@ -1,82 +1,42 @@
 package proxy
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-// Retrieve all existing rules
-func (p *Proxy) rulesHandler(w http.ResponseWriter, r *http.Request) {
-	rules, err := p.db.ListRules()
+func (p *Proxy) ruleGetHandler(w http.ResponseWriter, r *http.Request, dn string) {
+	rule, err := p.api.RuleGet(w, r, dn)
+
 	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
+		p.WriteErrorJson(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	p.WriteJson(w, &rules)
+	p.WriteJson(w, rule)
 }
 
-// Retrieve an existing rule
-func (p *Proxy) ruleGet(w http.ResponseWriter, r *http.Request, dn string) {
+func (p *Proxy) rulePostHandler(w http.ResponseWriter, r *http.Request, dn string) {
+	rule, err := p.api.RulePost(w, r, dn)
 
-	rule, err := p.db.GetRuleFromDomainName(dn)
 	if err != nil {
-		p.WriteErrorJson(w, http.StatusNotFound, err)
+		p.WriteErrorJson(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	p.WriteJson(w, &rule)
+	p.WriteJson(w, rule)
 }
 
-// Create a new rule
-func (p *Proxy) rulePost(w http.ResponseWriter, r *http.Request, dn string) {
-	containerName := r.URL.Query().Get("containerName")
+func (p *Proxy) ruleDeleteHandler(w http.ResponseWriter, r *http.Request, dn string) {
+	rule, err := p.api.RuleDelete(w, r, dn)
 
-	// check if container has a valid exposedPort
-	container, err := p.db.GetContainer(containerName)
 	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
+		p.WriteErrorJson(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	if container.ExposedPort == 0 {
-		p.WriteErrorJson(w, http.StatusInternalServerError,
-			fmt.Errorf("container %s has no valid exposedPort set", container.Name))
-		return
-	}
-
-	err = p.db.InsertRule(dn, containerName)
-	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	rule, err := p.db.GetRuleFromDomainName(dn)
-	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	p.WriteJson(w, &rule)
-}
-
-// Delete a rule
-func (p *Proxy) ruleDelete(w http.ResponseWriter, r *http.Request, dn string) {
-	rule, err := p.db.GetRuleFromDomainName(dn)
-	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	err = p.db.DeleteRuleFromDomainName(dn)
-	if err != nil {
-		p.WriteErrorJson(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	p.WriteJson(w, &rule)
+	p.WriteJson(w, rule)
 }
 
 // Main rule handler
@@ -85,12 +45,12 @@ func (p *Proxy) ruleHandler(w http.ResponseWriter, r *http.Request) {
 	dn := vars["dn"]
 
 	if r.Method == http.MethodGet {
-		p.ruleGet(w, r, dn)
+		p.ruleGetHandler(w, r, dn)
 
 	} else if r.Method == http.MethodPost {
-		p.rulePost(w, r, dn)
+		p.rulePostHandler(w, r, dn)
 
 	} else if r.Method == http.MethodDelete {
-		p.ruleDelete(w, r, dn)
+		p.ruleDeleteHandler(w, r, dn)
 	}
 }

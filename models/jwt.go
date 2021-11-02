@@ -56,6 +56,19 @@ func NewAccessTokenFromRequest(r *http.Request) AccessToken {
 	}
 }
 
+func NewAccessTokenFromCookie(r *http.Request) (AccessToken, error) {
+	cookie, err := r.Cookie("jwt")
+	if err != nil {
+		return AccessToken{}, err
+	}
+
+	authToken := cookie.Value
+	return AccessToken{
+		Token: authToken,
+	}, nil
+
+}
+
 func (a AccessToken) Verify(jwtKey string) error {
 	token, err := jwt.ParseSigned(a.Token)
 	if err != nil {

@@ -52,14 +52,13 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	splitted := strings.Split(r.Host, ":")
 	dn := splitted[0]
 
-	rule, err := p.db.GetRuleFromDomainName(dn)
+	rule, err := p.api.GetRuleFromDomainName(dn)
 	if err != nil {
-		p.logger.Println(err)
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	container, err := p.db.GetContainer(rule.ContainerName)
+	container, err := p.api.GetContainer(rule.ContainerName)
 	if err != nil {
 		p.WriteErrorJson(w, http.StatusInternalServerError, err)
 		return
@@ -71,7 +70,7 @@ func (p *Proxy) redirectToContainer(w http.ResponseWriter, r *http.Request) {
 	if container.IsInPod {
 		podId := container.PodId
 		podInfraName := fmt.Sprintf("%s-infra", podId[:12])
-		pod, err := p.db.GetContainer(podInfraName)
+		pod, err := p.api.GetContainer(podInfraName)
 		if err != nil {
 			p.WriteErrorJson(w, http.StatusInternalServerError, err)
 			return

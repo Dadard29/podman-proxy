@@ -1,0 +1,11 @@
+{{template "main" .}}
+
+{{define "content"}}
+<div>
+    <form action="/login" method="post">
+        <label for="username">Username<input id="username" name="username" type="text"></label>
+        <label for="password">Password<input id="password" name="password" type="password"></label>
+        <input type="submit">Login</input>
+    </form>
+</div>
+{{end}}

@@ -1,15 +1,15 @@
-package proxy_test
+package models_test
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/Dadard29/podman-proxy/proxy"
+	"github.com/Dadard29/podman-proxy/models"
 )
 
 func TestInfraCpu(t *testing.T) {
-	infra := proxy.Infra{}
+	infra := models.NewInfra()
 	cpu, err := infra.GetCpuUsage(5 * time.Second)
 	if err != nil {
 		t.Errorf("failed getting CPU stats: %v", err)
@@ -20,7 +20,7 @@ func TestInfraCpu(t *testing.T) {
 }
 
 func TestInfraMem(t *testing.T) {
-	infra := proxy.Infra{}
+	infra := models.NewInfra()
 	mem, err := infra.GetMemUsage()
 	if err != nil {
 		t.Errorf("failed getting virtual mem: %v", err)
@@ -29,7 +29,7 @@ func TestInfraMem(t *testing.T) {
 }
 
 func TestInfraDisk(t *testing.T) {
-	infra := proxy.Infra{}
+	infra := models.NewInfra()
 	disk, err := infra.GetDiskUsage()
 	if err != nil {
 		t.Errorf("failed getting disk usage: %v", err)

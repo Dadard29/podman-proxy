@@ -6,11 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/Dadard29/podman-proxy/db"
-	"github.com/Dadard29/podman-proxy/models"
-	"github.com/Dadard29/podman-proxy/podman"
+	"github.com/Dadard29/podman-proxy/api"
+	"github.com/Dadard29/podman-proxy/web"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -19,12 +17,10 @@ type Proxy struct {
 	Upgrader *Upgrader
 
 	config config
-	db     *db.Db
 	logger *log.Logger
 	server *http.Server
 	router *mux.Router
-	podman *podman.PodmanRuntime
-	infra  Infra
+	api    *api.Api
 
 	Ctx    *context.Context
 	Cancel *context.CancelFunc
@@ -40,33 +36,6 @@ func (p *Proxy) Host() string {
 	} else {
 		return fmt.Sprintf("%s:%d", p.config.proxyHost, p.config.proxyPort)
 	}
-}
-
-func (p *Proxy) NewInfraLog() error {
-	cpu, err := p.infra.GetCpuUsage(3 * time.Second)
-	if err != nil {
-		p.logger.Println("WARNING: failed to get CPU")
-		return err
-	}
-	mem, err := p.infra.GetMemUsage()
-	if err != nil {
-		p.logger.Println("WARNING: failed to get memory")
-		return err
-	}
-	disk, err := p.infra.GetDiskUsage()
-	if err != nil {
-		p.logger.Println("WARNING: failed to get disk")
-		return err
-	}
-
-	infraLog := models.InfraLog{
-		Timestamp: time.Now(),
-		Cpu:       cpu,
-		Memory:    mem,
-		Disk:      disk,
-	}
-
-	return p.db.InsertInfraLog(infraLog)
 }
 
 func (p *Proxy) newHttpsServer(domainNames ...string) *http.Server {
@@ -105,45 +74,43 @@ func NewProxy() (*Proxy, error) {
 		return nil, err
 	}
 
-	proxyDb, err := db.NewDb(config.dbPath)
-	if err != nil {
-		return nil, err
-	}
-
 	logger := log.New(log.Default().Writer(), "proxy ", log.Default().Flags())
 	upgrader := NewUpgrader(config.upgraderPort)
-	infra := NewInfra()
 
-	runtime, err := podman.NewPodmanRuntime()
+	proxyApi, err := api.NewApi(config.dbPath)
 	if err != nil {
 		return nil, err
 	}
 
 	proxy := &Proxy{
 		config:   config,
-		db:       proxyDb,
 		logger:   logger,
 		server:   nil,
 		router:   nil,
 		Upgrader: upgrader,
-		podman:   runtime,
-		infra:    infra,
+		api:      proxyApi,
 
 		Ctx:    nil,
 		Cancel: nil,
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/auth", proxy.authHandler).Methods(http.MethodPost, http.MethodGet)
-	router.HandleFunc("/rule", proxy.rulesHandler).Methods(http.MethodGet)
-	router.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
-	router.HandleFunc("/domain-name", proxy.domainNamesHandler).Methods(http.MethodGet, http.MethodPut)
-	router.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
-	router.HandleFunc("/container", proxy.containersHandler).Methods(http.MethodGet, http.MethodPut)
-	router.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost)
-	router.HandleFunc("/container-sync", proxy.containerSyncHandler).Methods(http.MethodGet, http.MethodPost)
 
-	router.Use(proxy.authMiddleware)
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/auth", proxy.authHandler).Methods(http.MethodPost, http.MethodGet)
+	apiRouter.HandleFunc("/rule", proxy.ruleListHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/rule/{dn}", proxy.ruleHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	apiRouter.HandleFunc("/domain-name", proxy.domainNameListHandler).Methods(http.MethodGet, http.MethodPut)
+	apiRouter.HandleFunc("/domain-name/{dn}", proxy.domainNameHandler).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	apiRouter.HandleFunc("/container", proxy.containerListHandler).Methods(http.MethodGet, http.MethodPut)
+	apiRouter.HandleFunc("/container/{container}", proxy.containerHandler).Methods(http.MethodGet, http.MethodPost)
+	apiRouter.HandleFunc("/container-sync", proxy.containerSyncHandler).Methods(http.MethodGet, http.MethodPost)
+
+	apiRouter.Use(proxy.authMiddleware)
+	apiRouter.Use(proxy.dbLoggingMiddleware)
+
+	webRouter := router.PathPrefix("/").Subrouter()
+	web.RegisterRoutes(webRouter)
 
 	proxy.router = router
 
@@ -159,19 +126,19 @@ func (p *Proxy) Serve(withTLS bool) error {
 
 	router := mux.NewRouter()
 	router.PathPrefix("/").HandlerFunc(p.switcher)
-	router.Use(p.dbLoggingMiddleware)
+	// router.Use(p.dbLoggingMiddleware)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	p.Cancel = &cancel
 	p.Ctx = &ctx
 
-	p.db.UpdateDomainNameLive()
+	p.api.UpdateDomainNameLive()
 
 	p.logger.Printf("Starting proxy server on %s...\n", p.Host())
 
 	if withTLS {
 		// get the list of domain names to register
-		domainNamesList, err := p.db.ListDomainNames()
+		domainNamesList, err := p.api.ListDomainNames()
 		if err != nil {
 			return err
 		}
@@ -220,8 +187,11 @@ func (p *Proxy) Shutdown() {
 	}
 }
 
+func (p *Proxy) NewInfraLog() error {
+	return p.api.NewInfraLog()
+}
+
 func (p *Proxy) Close() {
 	p.logger.Println("closing connections...")
-	p.podman.Stop()
-	p.db.Close()
+	p.api.Close()
 }
